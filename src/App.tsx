@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Layers, Database, Copy, Check, Info, Cpu, Users, 
+  Layers, Database, Copy, Check, Info, Cpu, Users, Gamepad2,
   RotateCcw, RefreshCw, CheckCircle, ChevronRight, BookOpen, ExternalLink, Github,
   Sun, Moon, Sparkles, Award, ShieldAlert, FileText, Settings
 } from 'lucide-react';
@@ -459,29 +459,29 @@ export default function App() {
   return (
     <div className={`min-h-screen flex flex-col font-sans select-none transition-colors duration-200 ${
       theme === 'light' ? 'bg-slate-50 text-slate-800' : 'bg-slate-950 text-slate-100'
-    }`} id="abb-tic-tac-toe-app">
+    }`} id="tic-tac-toe-app">
       
-      {/* Visual Header inspired by ABB corporate Swiss design identity (Red / White / Gray) */}
+      {/* Friendly Game Header with Gamepad2 logo */}
       <header className={`border-b py-4 px-6 flex flex-col md:flex-row items-center justify-between gap-4 shrink-0 transition-all duration-200 ${
         theme === 'light' ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900 border-slate-800 shadow-lg'
       }`} id="app-header">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          {/* Corporate style visual badge */}
+          {/* Playful and Game-friendly brand badge */}
           <div className="flex items-center gap-3">
-            <div className="bg-red-600 px-3 py-1 rounded shadow-md flex items-center justify-center transition-transform hover:scale-105">
-              <span className="font-sans font-black tracking-tighter text-white text-lg">ABB</span>
+            <div className="bg-indigo-600 p-2.5 rounded-2xl shadow-md flex items-center justify-center transition-all hover:scale-105">
+              <Gamepad2 className="h-5 w-5 text-white" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h1 className={`text-lg font-black tracking-tight ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>Tic-Tac-Toe</h1>
-                <span className={`border text-[9px] px-2.5 py-0.5 rounded-full font-bold font-mono tracking-wider ${
-                  theme === 'light' ? 'bg-red-50 border-red-200 text-red-600' : 'bg-red-950/40 border-red-900/60 text-red-400'
+                <span className={`border text-[9px] px-2.5 py-0.5 rounded-full font-bold tracking-wider ${
+                  theme === 'light' ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'bg-indigo-950/40 border-indigo-900/60 text-indigo-400'
                 }`}>
-                  PRO SYSTEM
+                  PLAY EDITION
                 </span>
               </div>
               <p className={`text-[11px] font-medium leading-normal max-w-sm sm:max-w-md ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>
-                Full-stack match processor integrated with direct program calculation models and state validation loops.
+                Master your tactics against smart AI difficulties or challenge a friend in classic local gameplay!
               </p>
             </div>
           </div>
@@ -493,10 +493,10 @@ export default function App() {
           <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border transition-all text-[11px] font-semibold shrink-0 ${
             theme === 'light' ? 'bg-slate-50 border-slate-200 text-slate-600' : 'bg-slate-950 border-slate-800 text-slate-300'
           }`}>
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
-            <span className="font-mono text-[9px] uppercase font-extrabold text-slate-400">CONFIG:</span>
+            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse shrink-0"></span>
+            <span className="font-mono text-[9px] uppercase font-extrabold text-slate-400">MODE:</span>
             <span className={`font-bold py-0.5 px-1.5 rounded text-[9px] ${
-              theme === 'light' ? 'bg-slate-200 text-slate-800' : 'bg-slate-800 text-neutral-200'
+              theme === 'light' ? 'bg-indigo-100/70 text-indigo-800' : 'bg-indigo-950/40 text-indigo-400'
             }`}>
               {gameState.gameMode === 'Computer' ? `vs Computer (${difficulty})` : '2-Player Local'}
             </span>
@@ -511,9 +511,9 @@ export default function App() {
                 : 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700 hover:border-slate-600 active:scale-95'
             }`}
             id="btn-help-guide"
-            title="Open comprehensive gaming handbook and algorithm decision registers."
+            title="Open game guide and rules playbook."
           >
-            <BookOpen className="h-3.5 w-3.5 text-red-500 shrink-0" />
+            <BookOpen className="h-3.5 w-3.5 text-indigo-500 shrink-0" />
             <span className="hidden xs:inline">Rules & AI Guide</span>
             <span className="xs:hidden">Rules</span>
           </button>
@@ -552,10 +552,10 @@ export default function App() {
               <h3 className={`text-xs uppercase font-extrabold tracking-wider mb-2 flex items-center gap-1.5 ${
                 theme === 'light' ? 'text-slate-500' : 'text-slate-400'
               }`}>
-                <Cpu className="h-4 w-4 text-red-500 font-bold" /> Opponent Mode Selection
+                <Cpu className="h-4 w-4 text-indigo-500 font-bold" /> Play Mode
               </h3>
               <p className={`text-[11px] mb-4 leading-relaxed ${theme === 'light' ? 'text-slate-550' : 'text-slate-400'}`}>
-                Toggle play style configurations. The Computer AI evaluates moves programmatically in real-time.
+                Switch between playing with someone next to you, or testing your skills against our computer opponent!
               </p>
               
               <div className={`flex gap-1.5 p-1 rounded-xl border transition-colors ${
@@ -563,9 +563,9 @@ export default function App() {
               }`}>
                 <button 
                   onClick={() => handleModeChange('TwoPlayer')}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     gameState.gameMode === 'TwoPlayer' 
-                    ? 'bg-red-600 text-white shadow-sm' 
+                    ? 'bg-indigo-600 text-white shadow-sm hover:bg-indigo-700' 
                     : theme === 'light' ? 'hover:bg-slate-200/80 text-slate-600' : 'hover:bg-slate-900 text-slate-400'
                   }`}
                   id="btn-mode-twoplayer">
@@ -573,9 +573,9 @@ export default function App() {
                 </button>
                 <button 
                   onClick={() => handleModeChange('Computer')}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     gameState.gameMode === 'Computer' 
-                    ? 'bg-red-600 text-white shadow-sm' 
+                    ? 'bg-indigo-600 text-white shadow-sm hover:bg-indigo-700' 
                     : theme === 'light' ? 'hover:bg-slate-200/80 text-slate-600' : 'hover:bg-slate-900 text-slate-400'
                   }`}
                   id="btn-mode-computer">
@@ -588,17 +588,17 @@ export default function App() {
                   <label className={`block text-[10px] uppercase font-extrabold tracking-wider mb-2.5 ${
                     theme === 'light' ? 'text-slate-500' : 'text-slate-400'
                   }`}>
-                    AI Calculation Difficulty
+                    AI Difficulty Levels
                   </label>
                   <p className={`text-[10px] mb-3 leading-relaxed ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>
-                    Select adaptive computer algorithms: Easy (purely random moves), Medium (50/50 decision splits), or Hard (strategic win/block priority sequence).
+                    Select computer skill setting: Easy (random moves), Medium (mixes strategies), or Hard (optimal play paths).
                   </p>
                   <div className={`flex gap-1.5 p-1 rounded-xl border transition-colors ${
                     theme === 'light' ? 'bg-slate-50 border-slate-200/80' : 'bg-slate-950 border-slate-800/80'
                   }`}>
                     <button 
                       onClick={() => handleDifficultyChange('Easy')}
-                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         difficulty === 'Easy' 
                         ? 'bg-emerald-500 text-white shadow-sm' 
                         : theme === 'light' ? 'hover:bg-slate-200 text-slate-600' : 'hover:bg-slate-800 text-slate-400'
@@ -608,7 +608,7 @@ export default function App() {
                     </button>
                     <button 
                       onClick={() => handleDifficultyChange('Medium')}
-                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         difficulty === 'Medium' 
                         ? 'bg-amber-500 text-white shadow-sm' 
                         : theme === 'light' ? 'hover:bg-slate-200 text-slate-650' : 'hover:bg-slate-800 text-slate-400'
@@ -618,9 +618,9 @@ export default function App() {
                     </button>
                     <button 
                       onClick={() => handleDifficultyChange('Hard')}
-                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         difficulty === 'Hard' 
-                        ? 'bg-red-600 text-white shadow-sm' 
+                        ? 'bg-rose-500 text-white shadow-sm hover:bg-rose-600' 
                         : theme === 'light' ? 'hover:bg-slate-200 text-slate-650' : 'hover:bg-slate-800 text-slate-400'
                       }`}
                       id="btn-diff-hard">
@@ -631,7 +631,7 @@ export default function App() {
               )}
             </div>
 
-            {/* Production Scoreboard */}
+            {/* Scoreboard */}
             <div className={`border rounded-2xl p-5 shadow-sm transition-all duration-200 ${
               theme === 'light' ? 'bg-white border-slate-200 text-slate-800' : 'bg-slate-900 border-slate-800/80 text-slate-100'
             }`} id="scoreboard-component">
@@ -639,21 +639,21 @@ export default function App() {
                 <h3 className={`text-xs uppercase font-extrabold tracking-wider flex items-center gap-1.5 ${
                   theme === 'light' ? 'text-slate-500' : 'text-slate-400'
                 }`}>
-                  <Database className="h-4 w-4 text-emerald-500" /> Synchronization Scoreboard
+                  <Database className="h-4 w-4 text-indigo-500" /> Scoreboard
                 </h3>
                 <button 
                   onClick={handleResetScoreboard}
-                  className={`text-[10px] font-bold flex items-center gap-1 px-2.5 py-1 rounded border transition-colors ${
+                  className={`text-[10px] font-bold flex items-center gap-1 px-2.5 py-1 rounded-xl border transition-colors cursor-pointer ${
                     theme === 'light' 
-                      ? 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100' 
-                      : 'bg-red-950/20 border-red-900/40 text-red-400 hover:text-red-300'
+                      ? 'bg-indigo-50 border-indigo-200 text-indigo-600 hover:bg-indigo-100' 
+                      : 'bg-indigo-950/20 border-indigo-900/40 text-indigo-400 hover:text-indigo-300'
                   }`}
                   id="btn-reset-scoreboard">
                   Reset Scores
                 </button>
               </div>
-              <p className={`text-[11px] mb-4 leading-relaxed ${theme === 'light' ? 'text-slate-550' : 'text-slate-400'}`}>
-                Session-level scoreboard served transparently. Winning entries lock values automatically.
+              <p className={`text-[11px] mb-4 leading-relaxed ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>
+                Track active victories and draw outcomes for the current play session.
               </p>
 
               <div className="grid grid-cols-3 gap-2">
@@ -698,8 +698,8 @@ export default function App() {
                   theme === 'light' ? 'bg-slate-100/55' : 'bg-slate-950/55'
                 }`}>
                   <div className="flex flex-col items-center gap-2">
-                    <RefreshCw className="h-7 w-7 text-red-600 animate-spin" />
-                    <span className={`text-[10px] font-mono tracking-wider font-extrabold ${theme === 'light' ? 'text-red-700' : 'text-red-400'}`}>Executing Action...</span>
+                    <RefreshCw className="h-7 w-7 text-indigo-500 animate-spin" />
+                    <span className={`text-[10px] tracking-wider font-extrabold ${theme === 'light' ? 'text-indigo-600' : 'text-indigo-400'}`}>AI is thinking...</span>
                   </div>
                 </div>
               )}
@@ -707,29 +707,29 @@ export default function App() {
               {/* Status Header */}
               <div className="mb-5 flex items-center justify-between w-full px-1">
                 <div className="flex items-center gap-2">
-                  <span className={`text-xs font-bold ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>State:</span>
+                  <span className={`text-xs font-extrabold tracking-wide uppercase ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Status:</span>
                   {gameState.gameStatus === 'InProgress' ? (
-                    <span className={`text-[10px] font-extrabold uppercase px-2.5 py-1 rounded border font-mono ${
+                    <span className={`text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full border ${
                       gameState.currentPlayer === 'X' 
-                        ? theme === 'light' ? 'bg-teal-50 border-teal-200 text-teal-600' : 'bg-teal-950 border-teal-800 text-teal-400' 
-                        : theme === 'light' ? 'bg-amber-50 border-amber-200 text-amber-600' : 'bg-amber-950 border-amber-800 text-amber-400'
+                        ? theme === 'light' ? 'bg-teal-50 border-teal-200 text-teal-650' : 'bg-teal-950/40 border-teal-900/60 text-teal-400' 
+                        : theme === 'light' ? 'bg-amber-50 border-amber-200 text-amber-650' : 'bg-amber-950/40 border-amber-900/60 text-amber-400'
                     }`}>
-                      {gameState.gameMode === 'Computer' && gameState.currentPlayer === 'O' ? 'Computer Thinking' : `Player ${gameState.currentPlayer} Turn`}
+                      {gameState.gameMode === 'Computer' && gameState.currentPlayer === 'O' ? '🧠 Computer Thinking' : `Player ${gameState.currentPlayer} Turn`}
                     </span>
                   ) : (
-                    <span className={`text-[10px] px-2.5 py-1 rounded border font-mono font-bold tracking-wider ${
-                      theme === 'light' ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-slate-950 border-slate-800 text-slate-500'
+                    <span className={`text-[10px] px-2.5 py-1 rounded-full border font-bold tracking-wider ${
+                      theme === 'light' ? 'bg-slate-100 border-slate-200 text-slate-500' : 'bg-slate-950/40 border-slate-800 text-slate-400'
                     }`}>
                       Match Finished
                     </span>
                   )}
                 </div>
 
-                <div className={`text-[9px] font-mono flex items-center gap-1.5 px-2 py-1 rounded border transition-colors ${
+                <div className={`text-[9px] flex items-center gap-1.5 px-2 py-1 rounded-lg border transition-colors ${
                   theme === 'light' ? 'bg-slate-50 border-slate-200 text-slate-500' : 'bg-slate-950 border-slate-800 text-slate-400'
                 }`}>
-                  <span>Session:</span>
-                  <span className="font-bold text-red-500">{gameState.gameId.substring(0, 8)}</span>
+                  <span>Match ID:</span>
+                  <span className="font-bold text-teal-500 font-mono">{gameState.gameId.substring(0, 8)}</span>
                 </div>
               </div>
 
@@ -776,19 +776,19 @@ export default function App() {
                 <div className="mt-5 text-center animate-[fadeIn_0.22s_ease-out] w-full px-2">
                   {gameState.gameStatus === 'Won' ? (
                     <div className="flex flex-col items-center gap-1.5 bg-red-600/5 border border-red-500/20 p-3 rounded-xl">
-                      <span className="text-xs font-extrabold flex items-center gap-1.5 text-red-600 dark:text-red-400">
-                        <Award className="h-4 w-4 shrink-0" />
-                        🏆 Player {gameState.winner === 'X' ? 'X Wins!' : 'O (AI) Wins!'}
+                      <span className="text-xs font-extrabold flex items-center gap-1.5 text-teal-600 dark:text-teal-400">
+                        <Award className="h-4 w-4 shrink-0 text-amber-500" />
+                        🏆 {gameState.gameMode === 'Computer' && gameState.winner === 'O' ? 'AI Wins! Better luck next time!' : `Player ${gameState.winner} Wins!`}
                       </span>
-                      <span className={`text-[10px] ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Score updated and locked dynamically in standard registers.</span>
+                      <span className={`text-[10px] ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Score registered! Play again with a different setup.</span>
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center gap-1.5 bg-slate-500/5 border border-slate-500/20 p-3 rounded-xl">
-                      <span className={`text-xs font-extrabold flex items-center gap-1.5 ${theme === 'light' ? 'text-slate-700' : 'text-slate-300'}`}>
-                        <Info className="h-4 w-4 text-slate-500 shrink-0" />
-                        🤝 Play Ground Draw Outcome
+                    <div className="flex flex-col items-center gap-1.5 bg-indigo-500/5 border border-indigo-500/10 p-3 rounded-xl">
+                      <span className={`text-xs font-extrabold flex items-center gap-1.5 ${theme === 'light' ? 'text-indigo-700' : 'text-indigo-350'}`}>
+                        <Info className="h-4 w-4 text-indigo-500 shrink-0" />
+                        🤝 Match Ended in Draw
                       </span>
-                      <span className={`text-[10px] ${theme === 'light' ? 'text-slate-550' : 'text-slate-400'}`}>Both sides exhausted coordinate cells without wins.</span>
+                      <span className={`text-[10px] ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Both sides played beautifully to a stalemate!</span>
                     </div>
                   )}
                 </div>
@@ -805,7 +805,7 @@ export default function App() {
                       ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:bg-slate-100'
                       : 'bg-slate-950 border-slate-850 text-slate-300 hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-slate-950'
                   }`}
-                  title="Undo previous move. Score statistics regress dynamically on completion states."
+                  title="Go back one step."
                 >
                   <RotateCcw className="h-3.5 w-3.5" /> Undo Move
                 </button>
@@ -814,9 +814,9 @@ export default function App() {
                   id="btn-reset-game"
                   onClick={handleResetGame}
                   disabled={loading}
-                  className="flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold bg-red-600 text-white shadow-md hover:bg-red-700 transition-all text-xs"
+                  className="flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold bg-indigo-600 text-white shadow-md hover:bg-indigo-700 transition-all text-xs cursor-pointer"
                 >
-                  <RefreshCw className="h-3.5 w-3.5" /> Restart Match
+                  <RefreshCw className="h-3.5 w-3.5 animate-[spin_12s_linear_infinite]" /> New Match
                 </button>
               </div>
 
@@ -845,7 +845,7 @@ export default function App() {
               </div>
 
               <p className={`text-[11px] mb-4 leading-relaxed ${theme === 'light' ? 'text-slate-550' : 'text-slate-400'}`}>
-                Audit verification ledger. Undo commands roll back move indexes instantly.
+                Keep track of every step in your matches. Undoing a move will roll back the log.
               </p>
 
               <div className={`flex-1 border rounded-xl overflow-hidden flex flex-col ${
@@ -903,15 +903,15 @@ export default function App() {
         </div>
       </main>
 
-      {/* ABB Corporate Footer */}
+      {/* System Footer */}
       <footer className="bg-slate-900 border-t border-slate-800 px-6 py-4 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-400 shrink-0 select-none">
         <div className="flex items-center gap-2">
-          <span className="inline-block w-2 h-2 bg-red-600 rounded-full animate-ping" />
-          <span>ABB Industrial Precision Game Service Core running | Complete architectural conformance validated.</span>
+          <span className="inline-block w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
+          <span>Classic Tic-Tac-Toe Arcade • Train your strategy and have fun!</span>
         </div>
         
-        <div className="flex items-center gap-4 mt-2 sm:mt-0 font-mono text-[11px]">
-          <span className="flex items-center gap-1"><Github className="h-3.5 w-3.5 text-slate-400" /> github.com/abb-assessment</span>
+        <div className="flex items-center gap-4 mt-2 sm:mt-0 text-[11px]">
+          <span>Interactive Play Edition</span>
           <span>v1.2.0</span>
         </div>
       </footer>
@@ -926,12 +926,12 @@ export default function App() {
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b pb-4 mb-4 dark:border-slate-800">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-red-600/10 text-red-600 rounded-xl">
+                <div className="p-2 bg-indigo-500/10 text-indigo-600 rounded-xl">
                   <BookOpen className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-base tracking-tight leading-none">Gaming Handbook & AI Rules</h3>
-                  <span className="text-[10px] text-slate-400 font-medium font-mono">ABB Assessment Specification Conformance</span>
+                  <h3 className="font-extrabold text-base tracking-tight leading-none">Game Rules & Strategy Guide</h3>
+                  <span className="text-[10px] text-slate-400 font-medium font-sans">Playground Tactics & Optimal Decision Paths</span>
                 </div>
               </div>
               <button 
@@ -953,11 +953,11 @@ export default function App() {
               {/* Introduction Section */}
               <div className="space-y-1.5">
                 <h4 className="font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wide text-[11px] flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 bg-red-600 rounded-full" />
-                  Objective & Interaction Model
+                  <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full" />
+                  Game Goal
                 </h4>
                 <p className={`${theme === 'light' ? 'text-slate-600' : 'text-slate-400'}`}>
-                  This Tic-Tac-Toe system processes game coordinate points standardising the traditional 3x3 play interface. Alternate placing Marks (<span className="text-teal-500 font-bold">X</span> and <span className="text-amber-500 font-bold">O</span>) on valid vacant squares. Securing three aligned marks vertically, horizontally, or diagonally achieves victory.
+                  Tic-Tac-Toe is a classical grid match played on a 3x3 layout. Take turns placing your custom marks (<span className="text-teal-500 font-bold">X</span> and <span className="text-amber-500 font-bold">O</span>) inside any empty space. The first to line up three of their indicators in a horizontal, vertical, or diagonal line claims victory of the match!
                 </p>
               </div>
 
@@ -967,11 +967,11 @@ export default function App() {
                   theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/40 border-slate-850'
                 }`}>
                   <div className="flex items-center gap-2 mb-1.5">
-                    <Users className="h-4 w-4 text-teal-500 animate-pulse" />
+                    <Users className="h-4 w-4 text-teal-500 animate-[pulse_2s_infinite]" />
                     <span className="font-extrabold text-slate-900 dark:text-slate-200">Local PvP Mode</span>
                   </div>
                   <p className={`text-[11px] ${theme === 'light' ? 'text-slate-600' : 'text-slate-400'}`}>
-                    Two active players share one single screen. Alternate moves manually. Score limits and move paths are recorded in direct registers.
+                    Two players alternate turns on the same screen. Play with your friends or family side-by-side! Matches and score logs are fully interactive.
                   </p>
                 </div>
 
@@ -979,33 +979,33 @@ export default function App() {
                   theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/40 border-slate-850'
                 }`}>
                   <div className="flex items-center gap-2 mb-1.5">
-                    <Cpu className="h-4 w-4 text-red-500 animate-[pulse_2s_infinite]" />
+                    <Cpu className="h-4 w-4 text-indigo-500 animate-[pulse_2s_infinite]" />
                     <span className="font-extrabold text-slate-900 dark:text-slate-200">vs Computer AI</span>
                   </div>
                   <p className={`text-[11px] ${theme === 'light' ? 'text-slate-600' : 'text-slate-400'}`}>
-                    Play as <span className="font-bold text-teal-500 text-xs">X</span>. The program controls opponent brand <span className="font-bold text-amber-500 text-xs">O</span>. The backend solves strategic response paths immediately after your placement.
+                    Play as <span className="font-bold text-teal-500 text-xs">X</span>. The intelligent computer AI responds automatically as opponent <span className="font-bold text-amber-500 text-xs">O</span>, picking calculated coordinates instantly.
                   </p>
                 </div>
               </div>
 
-              {/* AI Priority Hierarchy (Mandated backend behaviors) */}
+              {/* AI Priority Hierarchy */}
               <div className={`p-4 rounded-xl border space-y-3 ${
-                theme === 'light' ? 'bg-red-50/15 border-red-500/10' : 'bg-red-950/10 border-red-900/20'
+                theme === 'light' ? 'bg-indigo-50/40 border-indigo-500/10' : 'bg-indigo-950/10 border-indigo-900/20'
               }`}>
                 <div className="flex items-center gap-2">
-                  <Settings className="h-4 w-4 text-red-650" />
-                  <span className="font-black text-[11px] uppercase tracking-wider text-red-650 dark:text-red-400">Computer AI Strategic Logic Hierarchy:</span>
+                  <Settings className="h-4 w-4 text-indigo-500" />
+                  <span className="font-black text-[11px] uppercase tracking-wider text-indigo-650 dark:text-indigo-400">Computer AI Decision Strategy Order:</span>
                 </div>
                 <p className={`text-[11px] ${theme === 'light' ? 'text-slate-600' : 'text-slate-400'}`}>
-                  Unveiling how our computer adversary prioritises target squares in its core decision cycle:
+                  When set to Hard difficulty, the computer evaluates the grid in this hierarchy to play its best response:
                 </p>
                 
                 <ol className="space-y-2.5 pl-1 text-[11px] text-slate-600 dark:text-slate-400">
                   <li className="flex gap-2">
-                    <span className="font-mono font-bold text-red-600 bg-red-600/15 rounded px-1.5 shrink-0 h-4 flex items-center justify-center">1</span>
+                    <span className="font-mono font-bold text-indigo-600 bg-indigo-500/15 rounded px-1.5 shrink-0 h-4 flex items-center justify-center dark:bg-indigo-950/50 dark:text-indigo-400">1</span>
                     <div>
-                      <strong className="text-slate-800 dark:text-slate-200">Win Strategy (Check O to Win)</strong>
-                      <p className="text-[10px] opacity-90 mt-0.5">Prioritises any cell completing 3-in-a-row for O to secure immediate game victory.</p>
+                      <strong className="text-slate-800 dark:text-slate-200">Check for Winning Moves (O)</strong>
+                      <p className="text-[10px] opacity-90 mt-0.5">Prioritizes completing any 3-in-a-row combination for O to win the current match immediately.</p>
                     </div>
                   </li>
                   <li className="flex gap-2">
@@ -1043,10 +1043,10 @@ export default function App() {
               <div className="space-y-1.5">
                 <h4 className="font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wide text-[11px] flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full" />
-                  Intelligent Undo Loop
+                  Smart Undo Support
                 </h4>
                 <p className={`${theme === 'light' ? 'text-slate-600' : 'text-slate-400'}`}>
-                  If errors occur, press <span className="font-bold text-slate-900 dark:text-slate-200">Undo Move</span>. In PvP, it removes the precise preceding step. In vs Computer AI mode, it automatically regresses <strong>both</strong> the computer's last response and your associated trigger action so you can restart from your last placement state with intact scoreboard integrity.
+                  Need a retry? Simply choose <span className="font-bold text-slate-900 dark:text-slate-200">Undo Move</span>. In a 2-Player Local match, it removes the last placement. In vs Computer mode, it automatically rolls back both the computer's reaction and your last move in one single step, keeping your match score consistent.
                 </p>
               </div>
 
@@ -1056,7 +1056,7 @@ export default function App() {
             <div className="border-t pt-4 mt-4 flex justify-end gap-2 dark:border-slate-800">
               <button
                 onClick={() => setShowHelp(false)}
-                className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-red-650 hover:bg-red-700 active:scale-95 transition-all cursor-pointer shadow-md"
+                className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-95 transition-all cursor-pointer shadow-md"
               >
                 Let me Play!
               </button>
