@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using EnterpriseTicTacToe.API.Services;
+using EnterpriseTicTacToe.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +39,9 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Enable Global Exception Handler Middleware at the start of Request Pipeline
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment() || true) // Enable Swagger in demo environment

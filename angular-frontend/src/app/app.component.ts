@@ -12,7 +12,7 @@ import { GameService } from './services/game.service';
       <!-- Title Header -->
       <header class="text-center mb-8">
         <h1 class="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-teal-400 to-emerald-500 bg-clip-text text-transparent">
-          Enterprise Tic-Tac-Toe
+          ABB Tic-Tac-Toe
         </h1>
         <p class="text-slate-400 mt-2 text-sm max-w-md">
           A high-performance Angular frontend communicating with a thread-safe .NET REST API.

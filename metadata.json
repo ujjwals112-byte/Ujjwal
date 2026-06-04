@@ -1,6 +1,6 @@
 {
-  "name": "Enterprise Tic Tac Toe Suite",
-  "description": "Enterprise-grade Tic Tac Toe implementation featuring an interactive simulator, complete .NET 8 Web API backend source, and modern Angular 18 frontend with testing and integration guides.",
+  "name": "ABB Tic-Tac-Toe",
+  "description": "High-fidelity Tic-Tac-Toe game implementation built with high architectural isolation, clean layout styling, double-move undo features, and real-time scoreboard synchronization.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

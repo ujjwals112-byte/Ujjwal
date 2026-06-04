@@ -6,11 +6,14 @@ using EnterpriseTicTacToe.API.DTOs;
 using EnterpriseTicTacToe.API.Models;
 using EnterpriseTicTacToe.API.Services;
 
+using EnterpriseTicTacToe.API.Filters;
+
 namespace EnterpriseTicTacToe.API.Controllers
 {
     [ApiController]
     [Route("api/games")]
     [Produces("application/json")]
+    [ApiKeyAuth]
     public class GamesController : ControllerBase
     {
         private readonly IGameService _gameService;

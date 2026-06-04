@@ -1,4 +1,4 @@
-# 🎮 Enterprise Web-Based Tic-Tac-Toe Game Suite
+# 🎮 ABB Tic-Tac-Toe Game Suite
 
 An enterprise-grade, full-stack Tic-Tac-Toe system featuring a robust, thread-safe **ASP.NET Core Web API 8** backend coupled with a modern reactive **Angular 18** frontend utilizing **Signals** and **RxJS**.
 

@@ -1,5 +1,5 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { catchError, finalize, tap } from 'rxjs/operators';
 import { throwError, Observable } from 'rxjs';
 import { GameStateResponse, CreateGameRequest, MakeMoveRequest, ScoreboardResponse } from '../models/game.model';
@@ -9,6 +9,14 @@ import { GameStateResponse, CreateGameRequest, MakeMoveRequest, ScoreboardRespon
 })
 export class GameService {
   private apiUrl = 'https://localhost:7111/api'; // Standard Dev .NET Https port
+
+  // Enterprise secure Http headers
+  private readonly httpOptions = {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json',
+      'X-API-KEY': 'TicTacToeEnterpriseSecretKey2026'
+    })
+  };
 
   // Enterprise Writable Signals for state management
   private gameStateSignal = signal<GameStateResponse | null>(null);
@@ -46,7 +54,7 @@ export class GameService {
     this.errorSignal.set(null);
     const modeValue = mode === 'TwoPlayer' ? 0 : 1;
 
-    return this.http.post<GameStateResponse>(`${this.apiUrl}/games`, { mode: modeValue } as CreateGameRequest).pipe(
+    return this.http.post<GameStateResponse>(`${this.apiUrl}/games`, { mode: modeValue } as CreateGameRequest, this.httpOptions).pipe(
       tap((response) => {
         this.gameStateSignal.set(response);
       }),
@@ -62,7 +70,7 @@ export class GameService {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
-    return this.http.get<GameStateResponse>(`${`${this.apiUrl}/games`}/${gameId}`).pipe(
+    return this.http.get<GameStateResponse>(`${`${this.apiUrl}/games`}/${gameId}`, this.httpOptions).pipe(
       tap((response) => {
         this.gameStateSignal.set(response);
       }),
@@ -80,7 +88,7 @@ export class GameService {
 
     const payload: MakeMoveRequest = { player, cellIndex };
 
-    return this.http.post<GameStateResponse>(`${this.apiUrl}/games/${gameId}/moves`, payload).pipe(
+    return this.http.post<GameStateResponse>(`${this.apiUrl}/games/${gameId}/moves`, payload, this.httpOptions).pipe(
       tap((response) => {
         this.gameStateSignal.set(response);
       }),
@@ -96,7 +104,7 @@ export class GameService {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
-    return this.http.post<GameStateResponse>(`${this.apiUrl}/games/${gameId}/undo`, {}).pipe(
+    return this.http.post<GameStateResponse>(`${this.apiUrl}/games/${gameId}/undo`, {}, this.httpOptions).pipe(
       tap((response) => {
         this.gameStateSignal.set(response);
       }),
@@ -112,7 +120,7 @@ export class GameService {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
-    return this.http.post<GameStateResponse>(`${this.apiUrl}/games/${gameId}/reset`, {}).pipe(
+    return this.http.post<GameStateResponse>(`${this.apiUrl}/games/${gameId}/reset`, {}, this.httpOptions).pipe(
       tap((response) => {
         this.gameStateSignal.set(response);
       }),
@@ -128,7 +136,7 @@ export class GameService {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
-    return this.http.post<ScoreboardResponse>(`${this.apiUrl}/scoreboard/reset`, {}).pipe(
+    return this.http.post<ScoreboardResponse>(`${this.apiUrl}/scoreboard/reset`, {}, this.httpOptions).pipe(
       tap((scoreResponse) => {
         const current = this.gameStateSignal();
         if (current) {

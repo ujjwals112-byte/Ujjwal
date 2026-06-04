@@ -3,11 +3,14 @@ using Microsoft.AspNetCore.Mvc;
 using EnterpriseTicTacToe.API.DTOs;
 using EnterpriseTicTacToe.API.Services;
 
+using EnterpriseTicTacToe.API.Filters;
+
 namespace EnterpriseTicTacToe.API.Controllers
 {
     [ApiController]
     [Route("api/scoreboard")]
     [Produces("application/json")]
+    [ApiKeyAuth]
     public class ScoreboardController : ControllerBase
     {
         private readonly IScoreboardService _scoreboardService;
