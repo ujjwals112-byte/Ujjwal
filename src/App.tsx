@@ -583,6 +583,7 @@ export default function App() {
                       {cell === 'O' && (
                         <span className="text-4xl font-extrabold text-amber-500 animate-[scaleUp_0.15s_ease-out]">O</span>
                       )}
+
                     </button>
                   );
                 })}

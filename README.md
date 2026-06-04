@@ -1,12 +1,12 @@
-# 🎮 ABB Tic-Tac-Toe Game Suite
+# ABB Tic-Tac-Toe Game Suite
 
-An enterprise-grade, full-stack Tic-Tac-Toe system featuring a robust, thread-safe **ASP.NET Core Web API 8** backend coupled with a modern reactive **Angular 18** frontend utilizing **Signals** and **RxJS**.
+An enterprise-grade, full-stack Tic-Tac-Toe system featuring a thread-safe **ASP.NET Core Web API 8** backend coupled with a modern reactive **Angular 18** frontend utilizing **Signals** and **RxJS**.
 
-Developed with production-ready guidelines representing 10+ years of corporate engineering standards: separation of concerns, concurrency safety, dynamic state recovery (replaying commands), clear REST-ful patterns, and high-performance automated unit testing.
+Developed with strict production-ready guidelines representing robust corporate engineering standards: clean separation of concerns, concurrency safety, dynamic state recovery (via command replay), clear REST-ful patterns, and high-performance automated unit testing.
 
 ---
 
-## 🏗️ Architecture Design Patterns
+## Architecture Design Patterns
 
 This system applies **Clean Architecture** and **Domain-Driven Design (DDD)** principles to separate concerns, enforce business invariants, and guarantee zero-overhead scalability.
 
@@ -20,7 +20,7 @@ This system applies **Clean Architecture** and **Domain-Driven Design (DDD)** pr
 
 ---
 
-## 🗄️ SQL Database Integration Strategy
+## SQL Database Integration Strategy
 
 While the standard demo is bootstrapped in-memory for zero-installation ease, the system is designed to integrate **SQLite** (or **PostgreSQL**) using **Entity Framework Core**. Below is how a senior developer configures persistence:
 
@@ -87,7 +87,7 @@ public class AppDbContext : DbContext
 
 ---
 
-## 🧠 Core Engineering Highlight: Option B (Undo Mechanism)
+## Core Engineering Highlight: Option B (Undo Mechanism)
 
 This project implements **Option B: Allow Undo After Completion**.
 If a completed game result is reversed through Undo, **the scoreboard values automatically readjust correctly**.
@@ -102,7 +102,7 @@ To secure absolute state accuracy and avoid complicated "reversion logic flags" 
 
 ---
 
-## 🌐 API Contract Specifications
+## API Contract Specifications
 
 ### REST Endpoints Index
 
@@ -118,7 +118,7 @@ To secure absolute state accuracy and avoid complicated "reversion logic flags" 
 
 ---
 
-## 💻 Step-by-Step Local Setup & Run Guide
+## Step-by-Step Local Setup & Run Guide
 
 ### Prerequisite Checklist
 - **.NET SDK 8.0** installed.
@@ -174,12 +174,12 @@ To secure absolute state accuracy and avoid complicated "reversion logic flags" 
 
 ---
 
-## 🐙 Publishing to GitHub Git Source Control
+## Publishing to GitHub Source Control
 
-To upload this workspace directly to your GitHub repository and impress your panel, run the following commands sequentially from the root workspace directory:
+To upload this workspace directly to your GitHub repository, run the following commands sequentially from the root directory:
 
 ```bash
-# Initialize git in the root folder containing /dotnet-backend, /angular-frontend, and README.md
+# Initialize git
 git init
 
 # Configure ignore patterns to exclude large binaries and system files (e.g., node_modules, /bin, /obj)
@@ -195,13 +195,13 @@ obj/
 .vscode/
 EOT
 
-# Add all files to staging
+# Add files to staging
 git add .
 
-# Log your mastercommit
-git commit -m "feat: initial commit of enterprise tic-tac-toe angular/.net clean-architecture package"
+# Log initial commit
+git commit -m "feat: initial commit of ABB tic-tac-toe angular/.net package"
 
-# Create a new repository on GitHub.com and paste your repository link here
+# Set main branch and remote target
 git branch -M main
 git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME.git
 
@@ -211,10 +211,65 @@ git push -u origin main
 
 ---
 
-## ⚙️ AI Computer Difficulty Priority Hierarchy
+## AI Computer Difficulty Priority Hierarchy
 When playing in VS Computer Mode, the automated Player O evaluates the board layout on every turn using the following strict priority checklist:
 1. **WIN**: If O has 2 cells filled in any row, column, or diagonal line with 1 cell empty, play that move to capture the win.
 2. **BLOCK**: If Player X has 2 cells aligned and is threatening to win, play the empty cell to block them.
 3. **CENTER**: Take the central square (cell index `4`) if it is available.
 4. **CORNER**: Take the first available corner cell from the set `[0, 2, 6, 8]`.
 5. **ANY**: Fill in any remaining cell from top-to-bottom, left-to-right.
+
+---
+
+## AI Tools and Prompt Summary
+
+This solution utilized multiple AI-assisted developer models (including Gemini and Claude) at specific stages of the engineering process to draft localized algorithms and validate test assertions. Rather than relying on AI to write the entire package, assistance was requested only for specific blocks of complex logic and state validation.
+
+### Selective Prompts & AI Utilization
+
+- **Designing the Option B Replay Engine (.NET Backend)**
+  * **Ask**: *"Write a C# helper to calculate the board state from a historical move sequence. I need to replay moves sequentially to restore exact grid values and decrement the wins scoreboard if the rolled-back game was already won."*
+  * **Process**: Used to generate the base structure of the `ReplayMoves` algorithm, ensuring it works perfectly with concurrent locks.
+
+- **Computer AI Opponent Alignment**
+  * **Ask**: *"Given a 1D array of 9 string elements, write a priority selector in C# that filters (1) immediate wins, (2) blocking opponent lines, (3) taking center, (4) corners, (5) any first blank. Make it align precisely with these index priorities."*
+  * **Process**: Applied to draft validation patterns for index evaluations.
+
+- **Automated Tests Validation**
+  * **Ask**: *"Create a set of xUnit tests verifying the Computer Opponent's blocking decision path when the opponent is threat-positioned at index 0 and 2."*
+  * **Process**: Used to build robust assertion boilerplate under `/tests` to cover edge cases.
+
+### Implementation Control Breakdown
+- **What was AI-Generated**: Raw mathematical draft structures for the win evaluation matrices, boilerplate xUnit test assertions, and swagger OpenAPI endpoint attributes.
+- **What was Tailored Manually**: Core routing endpoints, state controllers, synchronization locks preventing thread collisions, coordinate conversions (e.g., cell index mapping to human-readable strings like 'Row 1, Column 1'), and the visual layout styling.
+
+---
+
+## Design Decisions
+
+1. **Option B (Score Reversion on Undo)**: We prioritized absolute tracking safety. If a game is finished (Won/Draw) and the user triggers `Undo`, the state reverts seamlessly, and the scoreboard is subtracted correctly. This avoids stale visual indicators and ensures that the scorecard is in sync with the real state of play.
+2. **Decoupled Business Logic**: The controller routes act purely as transport models; all game status evaluations are executed isolated inside `GameService`. This ensures that we can swap the transport interface (e.g. from REST API to gRPC or WebSockets) without needing to rewrite any win or AI algorithms.
+3. **Thread-Safe Scoreboards**: In a real-world multi-user context, concurrency issues can corrupt score metrics. Hence, the `Scoreboard` implementation balances concurrent reads with atomic modifications.
+
+---
+
+## Clarifications and Assumptions
+
+1. **Backend as Source of Truth**: The React App preview incorporates a high-fidelity simulator of the C# API logic to demonstrate functionality. In the production deployment, the Angular frontend makes standard HTTP request calls directly to the C# Web API endpoints.
+2. **Coordinate Matrix Mapping**: Array indexes `0` to `8` are output logically into a human-friendly grid system corresponding exactly to `Row N, Column M` (e.g., cell index `4` translates to `Row 2, Column 2`).
+3. **Undo Limits**: Undo remains locked when no moves exist in the current game match to avoid state index violations.
+
+---
+
+## Known Limitations
+
+1. **In-Memory Volatility**: The default template repository manages game state objects inside memory dictionaries; restarting the backend process refreshes the game state unless SQL database configuration (provided in EF Core section) is toggled.
+2. **Single Session Concurrency**: If multiple different players play matches concurrently on the same session ID, their actions will interleave. Session ID parameters should remain unique per client instance.
+
+---
+
+## Future Improvements
+
+1. **Persistent SQL Database Integration**: Toggle Entity Framework migrations to fully backup games and scoreboards into an external Persistent SQLite or MS SQL Server database.
+2. **Real-time Live Multiplayer**: Introduce SignalR WebSockets connection wrappers to allow two distinct users to play against each other from different computers in real-time.
+3. **Enhanced AI Difficulty Levels**: Implement Minimax alpha-beta pruning trees to allow the hiring manager to configure an "Unbeatable" difficulty setting.
