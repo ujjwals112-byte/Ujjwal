@@ -1,0 +1,6 @@
+{
+  "name": "Enterprise Tic Tac Toe Suite",
+  "description": "Enterprise-grade Tic Tac Toe implementation featuring an interactive simulator, complete .NET 8 Web API backend source, and modern Angular 18 frontend with testing and integration guides.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
