@@ -37,7 +37,7 @@ namespace EnterpriseTicTacToe.API.Controllers
                 return BadRequest(ModelState);
             }
 
-            var session = _gameService.CreateGame(request.Mode);
+            var session = _gameService.CreateGame(request.Mode, request.Difficulty);
             var response = MapToResponse(session);
             
             return CreatedAtAction(nameof(GetGame), new { id = session.Id }, response);
@@ -150,6 +150,7 @@ namespace EnterpriseTicTacToe.API.Controllers
                 Board = session.Board,
                 CurrentPlayer = session.CurrentPlayer,
                 GameMode = session.Mode.ToString(),
+                Difficulty = session.Difficulty.ToString(),
                 GameStatus = session.Status.ToString(),
                 Winner = session.Winner,
                 WinningCells = session.WinningCells,

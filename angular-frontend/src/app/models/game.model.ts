@@ -1,5 +1,6 @@
 export type GameMode = 'TwoPlayer' | 'Computer';
 export type GameStatus = 'InProgress' | 'Won' | 'Draw';
+export type DifficultyLevel = 'Easy' | 'Medium' | 'Hard';
 
 export interface Move {
   moveNumber: number;
@@ -22,6 +23,7 @@ export interface GameStateResponse {
   board: string[];
   currentPlayer: string;
   gameMode: string;
+  difficulty: string;
   gameStatus: string;
   winner: string | null;
   winningCells: number[] | null;
@@ -31,6 +33,7 @@ export interface GameStateResponse {
 
 export interface CreateGameRequest {
   mode: number; // 0 = TwoPlayer, 1 = Computer
+  difficulty?: number; // 0 = Easy, 1 = Medium, 2 = Hard
 }
 
 export interface MakeMoveRequest {

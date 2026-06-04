@@ -16,6 +16,13 @@ namespace EnterpriseTicTacToe.API.Models
         Draw = 2
     }
 
+    public enum DifficultyLevel
+    {
+        Easy = 0,
+        Medium = 1,
+        Hard = 2
+    }
+
     public class GameSession
     {
         public Guid Id { get; set; } = Guid.NewGuid();
@@ -26,6 +33,8 @@ namespace EnterpriseTicTacToe.API.Models
         public string CurrentPlayer { get; set; } = "X"; // Alternates between X and O
         
         public GameMode Mode { get; set; } = GameMode.TwoPlayer;
+
+        public DifficultyLevel Difficulty { get; set; } = DifficultyLevel.Hard;
         
         public GameStatus Status { get; set; } = GameStatus.InProgress;
         

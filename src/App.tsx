@@ -42,19 +42,87 @@ interface SimulatedGameState {
 export default function App() {
   // Theme switcher state: defaults to elegant Light mode per client criteria (corporate off-white/red/slate)
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  // AI Difficulty level: defaults to 'Hard' to match C# backend settings
+  const [difficulty, setDifficulty] = useState<'Easy' | 'Medium' | 'Hard'>('Hard');
   
-  // Interactive match state
-  const [gameState, setGameState] = useState<SimulatedGameState>({
+  // Active mode switcher state
+  const [activeMode, setActiveMode] = useState<'TwoPlayer' | 'Computer'>('TwoPlayer');
+
+  // Dynamic game sessions and scoreboards kept isolated per game mode matching architecture specs
+  const [twoPlayerState, setTwoPlayerState] = useState<{
+    gameId: string;
+    board: string[];
+    currentPlayer: string;
+    gameStatus: 'InProgress' | 'Won' | 'Draw';
+    winner: string | null;
+    winningCells: number[] | null;
+    moveHistory: Move[];
+    scoreboard: Scoreboard;
+  }>({
     gameId: 'bb1fdf88-3921-4bcf-aae0-6dc1ca375eff',
     board: Array(9).fill(''),
     currentPlayer: 'X',
-    gameMode: 'TwoPlayer',
     gameStatus: 'InProgress',
     winner: null,
     winningCells: null,
     moveHistory: [],
     scoreboard: { winsX: 0, winsO: 0, draws: 0 }
   });
+
+  const [computerState, setComputerState] = useState<{
+    gameId: string;
+    board: string[];
+    currentPlayer: string;
+    gameStatus: 'InProgress' | 'Won' | 'Draw';
+    winner: string | null;
+    winningCells: number[] | null;
+    moveHistory: Move[];
+    scoreboard: Scoreboard;
+  }>({
+    gameId: '8d8a7cf2-7be6-4cb4-a3dc-b3a1a6b0c2a2',
+    board: Array(9).fill(''),
+    currentPlayer: 'X',
+    gameStatus: 'InProgress',
+    winner: null,
+    winningCells: null,
+    moveHistory: [],
+    scoreboard: { winsX: 0, winsO: 0, draws: 0 }
+  });
+
+  const activeState = activeMode === 'TwoPlayer' ? twoPlayerState : computerState;
+
+  const gameState: SimulatedGameState = {
+    ...activeState,
+    gameMode: activeMode,
+  };
+
+  const setGameState = (nextVal: SimulatedGameState | ((prev: SimulatedGameState) => SimulatedGameState)) => {
+    if (typeof nextVal === 'function') {
+      if (activeMode === 'TwoPlayer') {
+        setTwoPlayerState(prev => {
+          const simulatedPrev: SimulatedGameState = { ...prev, gameMode: 'TwoPlayer' };
+          const result = (nextVal as any)(simulatedPrev);
+          const { gameMode, ...rest } = result;
+          return rest;
+        });
+      } else {
+        setComputerState(prev => {
+          const simulatedPrev: SimulatedGameState = { ...prev, gameMode: 'Computer' };
+          const result = (nextVal as any)(simulatedPrev);
+          const { gameMode, ...rest } = result;
+          return rest;
+        });
+      }
+    } else {
+      const { gameMode, ...rest } = nextVal;
+      if (activeMode === 'TwoPlayer') {
+        setTwoPlayerState(rest);
+      } else {
+        setComputerState(rest);
+      }
+    }
+  };
 
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -160,7 +228,28 @@ export default function App() {
     return -1;
   };
 
+  const calculateEasyMove = (board: string[]): number => {
+    const available: number[] = [];
+    for (let i = 0; i < 9; i++) {
+      if (board[i] === '') {
+        available.push(i);
+      }
+    }
+    if (available.length === 0) return -1;
+    const rndIdx = Math.floor(Math.random() * available.length);
+    return available[rndIdx];
+  };
+
   const calculateSimulationOpponentMove = (board: string[]): number => {
+    if (difficulty === 'Easy') {
+      return calculateEasyMove(board);
+    } else if (difficulty === 'Medium') {
+      // 50% chance of random play, 50% chance of optimal play
+      if (Math.random() < 0.5) {
+        return calculateEasyMove(board);
+      }
+    }
+
     // Priority 1: WIN - If Computer (O) can win, play immediate winning move
     const winMove = findSimulationWinningCell(board, 'O');
     if (winMove !== -1) return winMove;
@@ -337,23 +426,31 @@ export default function App() {
   };
 
   const handleModeChange = (mode: 'TwoPlayer' | 'Computer') => {
-    if (gameState.gameMode === mode) return;
+    if (activeMode === mode) return;
 
+    setLoading(true);
+    setTimeout(() => {
+      setActiveMode(mode);
+      setLoading(false);
+    }, 150);
+  };
+
+  const handleDifficultyChange = (level: 'Easy' | 'Medium' | 'Hard') => {
+    if (difficulty === level) return;
+    setDifficulty(level);
     setLoading(true);
     setTimeout(() => {
       setGameState({
         ...gameState,
-        gameId: crypto.randomUUID ? crypto.randomUUID() : '8d8a7cf2-7be6-4cb4-a3dc-b3a1a6b0c2a2',
         board: Array(9).fill(''),
         currentPlayer: 'X',
-        gameMode: mode,
         gameStatus: 'InProgress',
         winner: null,
         winningCells: null,
         moveHistory: []
       });
       setLoading(false);
-    }, 150);
+    }, 120);
   };
 
   return (
@@ -451,6 +548,53 @@ export default function App() {
                   <Cpu className="h-3.5 w-3.5" /> vs Computer AI
                 </button>
               </div>
+
+              {gameState.gameMode === 'Computer' && (
+                <div className="mt-4 pt-4 border-t border-slate-200/50 dark:border-slate-800/80 animate-[fadeIn_0.15s_ease-out]" id="difficulty-selection-panel">
+                  <label className={`block text-[10px] uppercase font-extrabold tracking-wider mb-2.5 ${
+                    theme === 'light' ? 'text-slate-500' : 'text-slate-400'
+                  }`}>
+                    AI Calculation Difficulty
+                  </label>
+                  <p className={`text-[10px] mb-3 leading-relaxed ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>
+                    Select adaptive computer algorithms: Easy (purely random moves), Medium (50/50 decision splits), or Hard (strategic win/block priority sequence).
+                  </p>
+                  <div className={`flex gap-1.5 p-1 rounded-xl border transition-colors ${
+                    theme === 'light' ? 'bg-slate-50 border-slate-200/80' : 'bg-slate-950 border-slate-800/80'
+                  }`}>
+                    <button 
+                      onClick={() => handleDifficultyChange('Easy')}
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        difficulty === 'Easy' 
+                        ? 'bg-emerald-500 text-white shadow-sm' 
+                        : theme === 'light' ? 'hover:bg-slate-200 text-slate-600' : 'hover:bg-slate-800 text-slate-400'
+                      }`}
+                      id="btn-diff-easy">
+                      Easy
+                    </button>
+                    <button 
+                      onClick={() => handleDifficultyChange('Medium')}
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        difficulty === 'Medium' 
+                        ? 'bg-amber-500 text-white shadow-sm' 
+                        : theme === 'light' ? 'hover:bg-slate-200 text-slate-650' : 'hover:bg-slate-800 text-slate-400'
+                      }`}
+                      id="btn-diff-medium">
+                      Medium
+                    </button>
+                    <button 
+                      onClick={() => handleDifficultyChange('Hard')}
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        difficulty === 'Hard' 
+                        ? 'bg-red-600 text-white shadow-sm' 
+                        : theme === 'light' ? 'hover:bg-slate-200 text-slate-650' : 'hover:bg-slate-800 text-slate-400'
+                      }`}
+                      id="btn-diff-hard">
+                      Hard
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Production Scoreboard */}
@@ -482,19 +626,23 @@ export default function App() {
                 <div className={`border p-2.5 rounded-xl text-center shadow-sm transition-colors ${
                   theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800/60'
                 }`}>
-                  <span className="text-[10px] font-bold text-teal-600 block">Wins X (You)</span>
+                  <span className="text-[10px] font-bold text-teal-600 block font-sans">
+                    {gameState.gameMode === 'Computer' ? 'Wins X (You)' : 'Wins X (P1)'}
+                  </span>
                   <div className={`text-xl font-black mt-0.5 ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>{gameState.scoreboard.winsX}</div>
                 </div>
                 <div className={`border p-2.5 rounded-xl text-center shadow-sm transition-colors ${
                   theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800/60'
                 }`}>
-                  <span className="text-[10px] font-bold text-amber-600 block">Wins O (Opp)</span>
+                  <span className="text-[10px] font-bold text-amber-600 block font-sans">
+                    {gameState.gameMode === 'Computer' ? 'Wins O (AI)' : 'Wins O (P2)'}
+                  </span>
                   <div className={`text-xl font-black mt-0.5 ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>{gameState.scoreboard.winsO}</div>
                 </div>
                 <div className={`border p-2.5 rounded-xl text-center shadow-sm transition-colors ${
                   theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800/60'
                 }`}>
-                  <span className="text-[10px] font-bold text-slate-500 block">Draws</span>
+                  <span className="text-[10px] font-bold text-slate-500 block font-sans">Draws</span>
                   <div className={`text-xl font-black mt-0.5 ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>{gameState.scoreboard.draws}</div>
                 </div>
               </div>

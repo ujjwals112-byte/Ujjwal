@@ -10,6 +10,7 @@ namespace EnterpriseTicTacToe.API.DTOs
         public string[] Board { get; set; } = new string[9];
         public string CurrentPlayer { get; set; } = "X";
         public string GameMode { get; set; } = "TwoPlayer";
+        public string Difficulty { get; set; } = "Hard";
         public string GameStatus { get; set; } = "InProgress";
         public string? Winner { get; set; }
         public List<int>? WinningCells { get; set; }

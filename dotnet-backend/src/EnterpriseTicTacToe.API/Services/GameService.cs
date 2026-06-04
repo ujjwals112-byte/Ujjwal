@@ -16,12 +16,13 @@ namespace EnterpriseTicTacToe.API.Services
             _scoreboardService = scoreboardService;
         }
 
-        public GameSession CreateGame(GameMode mode)
+        public GameSession CreateGame(GameMode mode, DifficultyLevel difficulty = DifficultyLevel.Hard)
         {
             var session = new GameSession
             {
                 Id = Guid.NewGuid(),
                 Mode = mode,
+                Difficulty = difficulty,
                 CurrentPlayer = "X"
             };
             _sessions[session.Id] = session;
@@ -51,7 +52,7 @@ namespace EnterpriseTicTacToe.API.Services
                 // If in Computer Mode and game is still in progress, the computer (O) moves immediately
                 if (session.Mode == GameMode.Computer && session.Status == GameStatus.InProgress)
                 {
-                    int computerCell = CalculateComputerMove(session.Board);
+                    int computerCell = CalculateComputerMove(session.Board, session.Difficulty);
                     ApplyMoveToSession(session, "O", computerCell);
                 }
 
@@ -250,9 +251,24 @@ namespace EnterpriseTicTacToe.API.Services
             }
         }
 
-        private int CalculateComputerMove(string[] board)
+        private static readonly Random _random = new();
+
+        private int CalculateComputerMove(string[] board, DifficultyLevel difficulty)
         {
             // O is Computer, X is Human
+
+            if (difficulty == DifficultyLevel.Easy)
+            {
+                return CalculateEasyMove(board);
+            }
+            else if (difficulty == DifficultyLevel.Medium)
+            {
+                // 50% chance of optimal move, 50% chance of random move
+                if (_random.Next(2) == 0)
+                {
+                    return CalculateEasyMove(board);
+                }
+            }
             
             // Priority 1: If O can win, play the winning move
             int oWinCell = FindWinningCell(board, "O");
@@ -279,6 +295,26 @@ namespace EnterpriseTicTacToe.API.Services
             }
 
             throw new InvalidOperationException("No valid moves available for the computer.");
+        }
+
+        private int CalculateEasyMove(string[] board)
+        {
+            var availableIndices = new List<int>();
+            for (int i = 0; i < 9; i++)
+            {
+                if (string.IsNullOrEmpty(board[i]))
+                {
+                    availableIndices.Add(i);
+                }
+            }
+
+            if (availableIndices.Count == 0)
+            {
+                throw new InvalidOperationException("No valid moves available for the computer.");
+            }
+
+            int randomIndex = _random.Next(availableIndices.Count);
+            return availableIndices[randomIndex];
         }
 
         private int FindWinningCell(string[] board, string targetPlayer)

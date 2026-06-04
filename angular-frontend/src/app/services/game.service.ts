@@ -31,6 +31,7 @@ export class GameService {
   public readonly board = computed(() => this.gameStateSignal()?.board || Array(9).fill(''));
   public readonly currentPlayer = computed(() => this.gameStateSignal()?.currentPlayer || 'X');
   public readonly gameMode = computed(() => this.gameStateSignal()?.gameMode || 'TwoPlayer');
+  public readonly difficulty = computed(() => this.gameStateSignal()?.difficulty || 'Hard');
   public readonly gameStatus = computed(() => this.gameStateSignal()?.gameStatus || 'InProgress');
   public readonly winner = computed(() => this.gameStateSignal()?.winner || null);
   public readonly winningCells = computed(() => this.gameStateSignal()?.winningCells || null);
@@ -49,12 +50,19 @@ export class GameService {
   /**
    * POST /api/games - Create a new game session
    */
-  public createGame(mode: 'TwoPlayer' | 'Computer'): Observable<GameStateResponse> {
+  public createGame(mode: 'TwoPlayer' | 'Computer', difficulty: 'Easy' | 'Medium' | 'Hard' = 'Hard'): Observable<GameStateResponse> {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
     const modeValue = mode === 'TwoPlayer' ? 0 : 1;
+    const diffMap = { Easy: 0, Medium: 1, Hard: 2 };
+    const difficultyValue = diffMap[difficulty];
 
-    return this.http.post<GameStateResponse>(`${this.apiUrl}/games`, { mode: modeValue } as CreateGameRequest, this.httpOptions).pipe(
+    const body: CreateGameRequest = {
+      mode: modeValue,
+      difficulty: difficultyValue
+    };
+
+    return this.http.post<GameStateResponse>(`${this.apiUrl}/games`, body, this.httpOptions).pipe(
       tap((response) => {
         this.gameStateSignal.set(response);
       }),

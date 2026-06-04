@@ -205,5 +205,37 @@ namespace EnterpriseTicTacToe.Tests
             Assert.Equal(GameStatus.Won, state.Status);
             Assert.Equal("O", state.Winner);
         }
+
+        [Fact]
+        public void ComputerAI_EasyMode_ShouldMakeRandomValidMoves()
+        {
+            // Arrange
+            var s = _gameService.CreateGame(GameMode.Computer, DifficultyLevel.Easy);
+
+            // Act
+            _gameService.MakeMove(s.Id, "X", 4);
+
+            // Assert
+            var state = _gameService.GetGame(s.Id);
+            Assert.Equal(2, state.MoveHistory.Count);
+            var oMoves = state.MoveHistory.Where(m => m.Player == "O").ToList();
+            Assert.Single(oMoves);
+            Assert.True(oMoves[0].CellIndex >= 0 && oMoves[0].CellIndex <= 8);
+            Assert.NotEqual(4, oMoves[0].CellIndex); // Cannot move on center as X took it
+        }
+
+        [Fact]
+        public void ComputerAI_MediumMode_ShouldExecuteWithoutCrashing()
+        {
+            // Arrange
+            var s = _gameService.CreateGame(GameMode.Computer, DifficultyLevel.Medium);
+
+            // Act
+            _gameService.MakeMove(s.Id, "X", 0);
+
+            // Assert
+            var state = _gameService.GetGame(s.Id);
+            Assert.Equal(2, state.MoveHistory.Count);
+        }
     }
 }

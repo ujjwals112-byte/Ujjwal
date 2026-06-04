@@ -32,34 +32,64 @@ import { GameService } from './services/game.service';
         
         <!-- Column 1 & 2: Main Board & Controller Panel -->
         <section class="md:col-span-2 flex flex-col gap-6">
-          
-          <!-- Mode Switch Panel & Stats -->
+                   <!-- Mode Switch Panel & Stats -->
           <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-5 shadow-xl backdrop-blur-md">
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-              <div>
-                <label class="block text-xs uppercase font-semibold text-slate-400 tracking-wider mb-2">Game Mode</label>
-                <div class="inline-flex rounded-lg bg-slate-950 p-1 border border-slate-700/50">
-                  <button 
-                    (click)="changeMode('TwoPlayer')"
-                    [class.bg-teal-500]="activeMode() === 'TwoPlayer'"
-                    [class.text-slate-950]="activeMode() === 'TwoPlayer'"
-                    class="px-4 py-1.5 rounded-md text-xs font-bold transition-all duration-200">
-                    Two Player
-                  </button>
-                  <button 
-                    (click)="changeMode('Computer')"
-                    [class.bg-teal-500]="activeMode() === 'Computer'"
-                    [class.text-slate-950]="activeMode() === 'Computer'"
-                    class="px-4 py-1.5 rounded-md text-xs font-bold transition-all duration-200">
-                    vs Computer
-                  </button>
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div class="flex flex-wrap gap-4 items-center">
+                <div>
+                  <label class="block text-xs uppercase font-semibold text-slate-400 tracking-wider mb-2">Game Mode</label>
+                  <div class="inline-flex rounded-lg bg-slate-950 p-1 border border-slate-700/50">
+                    <button 
+                      (click)="changeMode('TwoPlayer')"
+                      [class.bg-teal-500]="activeMode() === 'TwoPlayer'"
+                      [class.text-slate-950]="activeMode() === 'TwoPlayer'"
+                      class="px-4 py-1.5 rounded-md text-xs font-bold transition-all duration-200">
+                      Two Player
+                    </button>
+                    <button 
+                      (click)="changeMode('Computer')"
+                      [class.bg-teal-500]="activeMode() === 'Computer'"
+                      [class.text-slate-950]="activeMode() === 'Computer'"
+                      class="px-4 py-1.5 rounded-md text-xs font-bold transition-all duration-200">
+                      vs Computer
+                    </button>
+                  </div>
                 </div>
+
+                @if (activeMode() === 'Computer') {
+                  <div class="animate-scale-up">
+                    <label class="block text-xs uppercase font-semibold text-slate-400 tracking-wider mb-2">AI Difficulty</label>
+                    <div class="inline-flex rounded-lg bg-slate-950 p-1 border border-slate-700/50">
+                      <button 
+                        (click)="changeDifficulty('Easy')"
+                        [class.bg-emerald-500]="selectedDifficulty() === 'Easy'"
+                        [class.text-slate-950]="selectedDifficulty() === 'Easy'"
+                        class="px-3 py-1.5 rounded-md text-xs font-bold transition-all duration-200">
+                        Easy
+                      </button>
+                      <button 
+                        (click)="changeDifficulty('Medium')"
+                        [class.bg-amber-500]="selectedDifficulty() === 'Medium'"
+                        [class.text-slate-950]="selectedDifficulty() === 'Medium'"
+                        class="px-3 py-1.5 rounded-md text-xs font-bold transition-all duration-200">
+                        Medium
+                      </button>
+                      <button 
+                        (click)="changeDifficulty('Hard')"
+                        [class.bg-rose-500]="selectedDifficulty() === 'Hard'"
+                        [class.text-slate-950]="selectedDifficulty() === 'Hard'"
+                        class="px-3 py-1.5 rounded-md text-xs font-bold transition-all duration-200">
+                        Hard
+                      </button>
+                    </div>
+                  </div>
+                }
               </div>
 
-              <div class="text-center sm:text-right">
+              <div class="text-center sm:text-right mt-2 sm:mt-0">
                 <span class="block text-xs uppercase font-semibold text-slate-400 tracking-wider mb-1">Session ID</span>
                 <span class="font-mono text-xs text-slate-400 bg-slate-950 px-2.5 py-1 rounded border border-slate-700/40">
-                  {{ gameId() ? gameId()?.slice(0, 8) + '...' : 'Genering...' }}
+                  {{ gameId() ? gameId()?.slice(0, 8) + '...' : 'Generating...' }}
                 </span>
               </div>
             </div>
@@ -214,6 +244,7 @@ export class AppComponent implements OnInit {
   public readonly error = this.gameService.error;
 
   public activeMode = signal<'TwoPlayer' | 'Computer'>('TwoPlayer');
+  public selectedDifficulty = signal<'Easy' | 'Medium' | 'Hard'>('Hard');
   public gameId = signal<string | null>(null);
 
   // True = Option A (Disable Undo after End), False = Option B (Allow Undo, correct Scoreboard)
@@ -226,7 +257,7 @@ export class AppComponent implements OnInit {
   }
 
   public startNewSession(): void {
-    this.gameService.createGame(this.activeMode()).subscribe({
+    this.gameService.createGame(this.activeMode(), this.selectedDifficulty()).subscribe({
       next: (response) => {
         this.gameId.set(response.gameId);
         this.clearError();
@@ -237,6 +268,12 @@ export class AppComponent implements OnInit {
   public changeMode(mode: 'TwoPlayer' | 'Computer'): void {
     if (this.activeMode() === mode) return;
     this.activeMode.set(mode);
+    this.startNewSession();
+  }
+
+  public changeDifficulty(difficulty: 'Easy' | 'Medium' | 'Hard'): void {
+    if (this.selectedDifficulty() === difficulty) return;
+    this.selectedDifficulty.set(difficulty);
     this.startNewSession();
   }
 

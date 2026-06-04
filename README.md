@@ -1,187 +1,166 @@
-# ABB Enterprise Tic-Tac-Toe Game Suite
+# Enterprise Tic-Tac-Toe Suite 🎮
 
-An enterprise-grade, thread-safe, and highly robust Tic-Tac-Toe system. This application couples a structured **ASP.NET Core 8 Web API** backend with a highly responsive, modern **Angular 18** frontend utilizing **Signals**, **RxJS**, and a component architecture.
+I built this project to demonstrate a clean, modern, full-stack implementation of a Tic-Tac-Toe gaming system. It couples a robust **ASP.NET Core 8 Web API** backend with a reactive **Angular 18** frontend utilizing **Signals**, **RxJS**, and **Tailwind CSS**. 
 
-This solution represents senior-level engineering standards: absolute separation of concerns, strict state persistence integrity, a command-replay rollback architecture for history, and an comprehensive automated test suite.
-
----
-
-## 1. Project Overview
-
-This repository contains a full-stack, browser-based Tic-Tac-Toe game designed for professional evaluation. The application features:
-- **Two Player Mode** (local pass-and-play).
-- **Play Against Computer Mode** (intelligent automated opponent).
-- **Durable Scoreboard** that is statefully managed on the backend and fully supports undo score reversions.
-- **Move History Tracking** with human-friendly grid coordinates (e.g., Row 2, Column 2 for index 4).
-- **Action Rollback (Undo)** which adapts gracefully dynamically based on the current mode (rolls back 1 move in Two-Player mode; rolls back a full pair [Player + AI] in Computer mode).
+Rather than relying on basic client-only logic, the entire state engine, concurrent sessions, scoreboard history, and AI strategies are managed server-side. I focused on clean separation of concerns, concurrency safety, dynamic game history rolling-back, and a comprehensive automated test suite.
 
 ---
 
-## 2. Tech Stack
+## 🚀 Architectural Blueprint
 
-### Backend
-- **ASP.NET Core 8 Web API**: Lightweight, high-throughput REST controllers.
-- **In-Memory Volatile Session Cache**: Memory registers leveraging standard thread-safe locking primitives and concurrent collectors (`ConcurrentDictionary`).
-- **Entity Framework Core Config Reference**: Built-in SQLite/PostgreSQL entity mapping schematics for production relational scaling.
-
-### Frontend
-- **Angular 18**: Structured reactive architecture with signals-driven change detection.
-- **Tailwind CSS**: High-fidelity custom aesthetic with dynamic responsive layouts optimized for varying viewports.
-- **RxJS**: Hand-crafted asynchronous HTTP streams mapping UI signals to REST API pipelines.
+The application is structured as a clear distributed system:
+*   **The Backend (C# / .NET 8 Web API)**: Formulated as a stateless controller layer communicating with a thread-safe in-memory session manager. It handles game simulation, AI move generation, scoreboard persistence, and history restoration.
+*   **The Frontend (TypeScript / Angular 18)**: Built entirely around Angular's modern **Signals** API for lightning-fast, predictable change detection, paired with **RxJS** pipelines to stream user interactions directly to backend REST endpoints.
 
 ---
 
-## 3. Features Implemented
+## ✨ Features Implemented
 
-1. **Standard 3x3 Grid Interface**: Lock-on-click cell actions, prevents movement on occupied tiles, active state indicators, and colored team tokens (Teal `X`, Amber `O`).
-2. **Win and Draw Detection**: Highlighted winning cell combinations, custom status banners, and prevention of any further actions once a match concludes.
-3. **Responsive Move History Logs**: Instantly updated table reporting the move index, current player, and detailed `Row N, Column M` indices.
-4. **Interactive Game Modes**: Toggleable between Two-Player mode and Play Against Computer.
-5. **Scoreboard Tracking**: Real-time win, loss, and draw counts managed asynchronously on backend endpoints.
-6. **Smart Computer AI Priorities**: Matches our advanced five-step priority flow: Win checking, defensive blocking, taking center, corner checks, and fallback sequential placements.
-7. **Robust Match Reset & Scoreboard Reset**: Clear independent control paths to reset board states while maintaining current score counts, or totally flushing the server scorecard.
-8. **Option B Rollback Pattern (Dynamic Post-Game Undo Support)**: Reverses the state of play, recalculates historical board layouts, and correctly decrements respective winning score counts from the active scoreboard.
-
----
-
-## 4. How to Run the Backend Locally
-
-### Prerequisites
-- **.NET SDK 8.0** installed on your workstation.
-
-### Step-by-Step Launch
-1. Open a terminal and navigate to the backend API root folder:
-   ```bash
-   cd dotnet-backend/src/EnterpriseTicTacToe.API
-   ```
-2. Restore internal packages:
-   ```bash
-   dotnet restore
-   ```
-3. Run the application:
-   ```bash
-   dotnet run
-   ```
-4. Verify the backend is up:
-   - The application starts automatically on SSL `https://localhost:7111` or HTTP `http://localhost:5111`.
-   - Access the native **Swagger OpenAPI UI** in your browser at `https://localhost:7111/index.html` to directly test endpoints.
+1.  **Multiple AI Difficulty Options**: Restructure vs-Computer mode with three adaptive modes:
+    *   **Easy**: Plays unpredictable, randomly selected valid moves.
+    *   **Medium**: A 50/50 split of strategic blocks and random choices.
+    *   **Hard**: Follows a deterministic 5-step win/block/center/corner rule matrix.
+2.  **Two-Player Mode**: Local pass-and-play supporting instant turns and live indicators.
+3.  **Active Move Log with GPS Coordinates**: Live history tables reporting exact indices translated on the fly into human-readable grids (such as `Row 2, Column 3`).
+4.  **State-Safe Undo Operations (Option B)**: Reverts state changes accurately. Clicking Undo dynamically checks the mode:
+    *   In *Two-Player mode*, it rolls back the single latest player move.
+    *   In *vs-Computer mode*, it rolls back a full turn pair (both the computer's move and your preceding move).
+    *   **Score Correction**: If a game had already ended in a Win/Draw when Undo is clicked, the system dynamically deducts that point from the persistent scoreboard server counters.
+5.  **Robust Concurrency Control**: Session states are isolated on the server using `ConcurrentDictionary` and guarded by thread locks, allowing multiple independent browser tabs to play separate matches concurrently.
+6.  **Interactive Dashboard Theme**: Sleek slate UI utilizing a high-contrast palette (Teal `X`, Amber `O`) with modern micro-animations.
 
 ---
 
-## 5. How to Run the Frontend Locally
+## 🛠️ Step-by-Step Local Setup
 
-### Prerequisites
-- **Node.js** (v18+) and **npm** installed.
+### Running the Backend REST API
+Ensure you have the **.NET SDK 8.0** installed on your workstation.
 
-### Step-by-Step Launch
-1. Open a terminal and navigate to the frontend folder:
-   ```bash
-   cd angular-frontend
-   ```
-2. Install local node dependencies:
-   ```bash
-   npm install
-   ```
-3. Boot the Angular local environment server:
-   ```bash
-   ng serve
-   ```
-4. Play the game:
-   - Open your browser to `http://localhost:4200` to start playing.
+1.  Open your terminal and navigate to the API project directory:
+    ```bash
+    cd dotnet-backend/src/EnterpriseTicTacToe.API
+    ```
+2.  Restore the dependencies:
+    ```bash
+    dotnet restore
+    ```
+3.  Boot the backend host:
+    ```bash
+    dotnet run
+    ```
+4.  **Verification**: 
+    - The API starts on Secure HTTPS `https://localhost:7111` and HTTP `http://localhost:5111`.
+    - You can head to `https://localhost:7111/index.html` in your browser to inspect or test all endpoints live via **Swagger UI**.
 
 ---
 
-## 6. API Endpoint Summary
+### Running the Angular Client App
+Ensure you have **Node.js (v18+)** and **npm** installed.
 
-The Web API backend manages all source-of-truth states through simple REST-oriented endpoints.
+1.  Open a separate terminal window and head to the client root directory:
+    ```bash
+    cd angular-frontend
+    ```
+2.  Install all packages:
+    ```bash
+    npm install
+    ```
+3.  Start the local Angular environment server:
+    ```bash
+    ng serve
+    ```
+4.  **Play**: Open `http://localhost:4200` to interact with the game.
 
-| Method | Endpoint | Description | Sample JSON Request Payload |
+---
+
+## 🧪 Testing and Verification
+
+I wrote a suite of automated unit tests to ensure that the core winner checks, invalid moves, and AI strategies are mathematically correct.
+
+To execute the unit tests:
+1.  Navigate to the testing directory:
+    ```bash
+    cd dotnet-backend/tests/EnterpriseTicTacToe.Tests
+    ```
+2.  Run the dotnet test runner:
+    ```bash
+    dotnet test
+    ```
+
+The assertions validate:
+*   Horizontal, vertical, and diagonal winning line coordinates.
+*   Draw states occurring on the 9th move.
+*   Correct AI blocking moves when a player is on the verge of winning.
+*   "Option B" score decrements when rollback triggers post-match victory.
+
+---
+
+## 📡 API Endpoint Reference
+
+The backend communicates via lightweight JSON payloads. Below is a summary of the active endpoints:
+
+| Method | Endpoint | Use Case | Payload Sample |
 | :--- | :--- | :--- | :--- |
-| **POST** | `/api/games` | Starts a new gaming session. | `{ "mode": 0 }` *(0: TwoPlayer, 1: Computer)* |
-| **GET** | `/api/games/{id}` | Fetches current board, Turn, and Game Mode specs. | No payload required |
-| **POST** | `/api/games/{id}/moves` | Proposes a move to a cell index. | `{ "player": "X", "cellIndex": 4 }` |
-| **POST** | `/api/games/{id}/undo` | Reverts outstanding moves (supports Option B score reductions). | No payload required |
-| **POST** | `/api/games/{id}/reset` | Refreshes current session board (resets history, retains scores). | No payload required |
-| **GET** | `/api/scoreboard` | Downloads persistent scoreboard counts. | No payload required |
-| **POST** | `/api/scoreboard/reset` | Core reset setting for global scores. | No payload required |
+| **POST** | `/api/games` | Starts a new session | `{ "mode": 1, "difficulty": 2 }` *(Mode 0: TwoPlayer, 1: Computer; Diff 0: Easy, 1: Medium, 2: Hard)* |
+| **GET** | `/api/games/{id}` | Fetches active board/turn state | None |
+| **POST** | `/api/games/{id}/moves` | Registers a move | `{ "player": "X", "cellIndex": 4 }` |
+| **POST** | `/api/games/{id}/undo` | Invokes dynamic rollback | None |
+| **POST** | `/api/games/{id}/reset` | Restarts current board (retains scores) | None |
+| **GET** | `/api/scoreboard` | Retrieves global scorecard | None |
+| **POST** | `/api/scoreboard/reset` | Resets global scorecard | None |
 
 ---
 
-## 7. How to Run Tests
+## 🧠 AI Co-Pilot & Prompt Engineering Strategy
 
-An executive suite of unit tests has been designed to validate core game dynamics, ensuring zero regressions on the mathematical components.
+Rather than letting AI build this system end-to-end, I wanted to act as the head architect. I designed the structure, wrote the API route endpoints, and built the Angular state services, but I treated LLMs (such as Claude 3.5 Sonnet and Gemini) as specialized static math calculators. 
 
-### Steps to Run Core Backend Tests:
-1. Navigate to the unit test directory path:
-   ```bash
-   cd dotnet-backend/tests/EnterpriseTicTacToe.Tests
-   ```
-2. Invoke the testing engine:
-   ```bash
-   dotnet test
-   ```
-Our tests thoroughly validate:
-- Row, column, and diagonal match win detections.
-- Validation patterns for illegal player turns or out-of-bounds inputs.
-- Accurate Computer AI blocking/winning priorities.
-- Option B undo scoreboard reduction logic.
+By writing highly specific, isolated prompts with strict input/output bounds, I had AI generate deterministic logic blocks, which I then integrated and manually refined.
 
----
+Here is the exact playbook of how I designed my prompts to solve key algorithms:
 
-## 8. AI Tools and Prompt Summary
-
-Rather than letting AI build this system end-to-end, I applied a highly targeted **"AI-Co-Pilot" workflow**. I directed LLMs (Gemini & Claude) with specific, highly technical prompts to design localized mathematics, validate tricky edge cases, and scaffold testing structures—while I hand-coded the architectural framework, state synchronization, and reactive UI wrappers.
-
-### Key Prompt Engineering Scenarios:
-
-#### Scenario A: Designing the Option B Stateful Rollback Logic (C#)
-* **Goal**: Devise an algorithm to safely undo a move, calculate historical steps, and decrement the winning scorecard if rollback occurs post-victory.
-* **My Prompt**:
-  > *"Write a C# helper function in an in-memory repository to manage dynamic undo operations. The game runs in two modes (Two-Player and AI). If the current match has ended (Won/Draw) and the user triggers an Undo, we need to mathematically decrement the wins/draws counters. Then, remove either the latest move (Two-Player) or last two moves (AI mode) and safely reconstruct the absolute board state from scratch using a historical log of movements. Provide thread-safe operations."*
-* **AI Output**: A deterministic command-replay function template.
-* **My Refinement**: Integrated locking primitives (`lock(session)`) directly into the `GameService` layer to safeguard against concurrent network collisions.
-
-#### Scenario B: Mapping AI Priority Strategy Matrix (C#)
-* **Goal**: Build a deterministic selector matching the five priority levels: Complete-Win -> Block-Enemy -> Select-Center -> Select-Corner -> Fallback.
-* **My Prompt**:
-  > *"Given a 1D grid representation with nine elements (empty strings or 'X' / 'O' values), write a highly performant C# matching engine for Computer Player O. The evaluation priority is: (1) O immediate win possibility, (2) blocking an imminent X cell victory, (3) capturing center index 4, (4) choosing from corner indexes [0, 2, 6, 8], (5) choosing any remaining cell. Output only the target integer index. Make edge case combinations secure against crashes."*
-* **AI Output**: Basic logic flow checking rows/columns using predefined arrays.
-* **My Refinement**: Structured this directly into `GameService` as helper methods, ensuring that the AI never makes a move if the match has already concluded.
-
-#### Scenario C: xUnit Testing Scaffolding (C#)
-* **Goal**: Accelerate test coverage for board checking routines.
-* **My Prompt**:
-  > *"Provide a complete C# xUnit test harness for our Tic-Tac-Toe state checker. I need assertions checking horizontal/vertical lines, draw states with nine moves, and a scenario proving the AI correctly blocks the player when X has symbols at index 1 and 2."*
-* **AI Output**: Structural mock files and assertions.
-* **My Refinement**: Mapped these cleanly to test frameworks, wrapping them in continuous evaluation loops.
+### Prompt 1: Designing the Option B Stateful Rollback Logic (C#)
+*   **Target Context**: Creating a robust undo mechanism that can correctly reconstruct past board layouts from a log of coordinates, adjust scoreboard states retrospectively, and remain concurrent-safe.
+*   **Prompt I wrote**:
+    > "I am writing a game state manager in a C# Web API. The system stores GameSession objects in an in-memory repository. A game has a list of moves `{ integer index, player tag }`. If a match concludes with a winner (or a draw) and the scorecard is incremented, and then the user selects 'Undo', I need to revert that match-end state. 
+    > 
+    > Write a C# helper method that:
+    > 1. Checks if the log has enough moves.
+    > 2. Re-evaluates if the game state was already marked won/draw, and if so, instructs me on how to decrement the current scoreboard.
+    > 3. Truncates either the last 1 move (TwoPlayer mode) or last 2 moves (vs Computer mode).
+    > 4. Completely rebuilds the 3x3 board array state (9 string elements) step-by-step from the remaining historical moves so we never end up with corrupt states. Make the lookup thread-safe."
+*   **How I refined the result**: The AI provided a clean sequential replay generator. I integrated it into my `GameService` and wrapped the execution blocks in explicit thread-safety loops (`lock (session)`) to prevent racing conditions from concurrent tabs.
 
 ---
 
-## 9. Design Decisions
-
-1. **The Command Replay Pattern**: Rather than trying to maintain complex, fragile "inverse state flags" (which are highly susceptible to database sync corruption), undo-states are reconstructed purely from historical command sequence replay. This ensures flawless state recovery.
-2. **Concurrency-Safe API State**: To protect sessions in multi-client scenarios, we map active sessions using thread-safe structures (`ConcurrentDictionary`) protected by instance-level transaction locks to block racing requests.
-3. **Separation of API and Business Logic Layers**: All endpoint actions are lean wrappers; the game validator checks, turn transitions, and AI behaviors are fully isolated from network protocols.
-
----
-
-## 10. Clarifications and Assumptions
-
-- **Coordinate Formats**: Payloads use simple, lightweight indices (0-8) for communication, while the frontend dynamically translates and displays them into human-readable coordinates (`Row N, Column M`).
-- **Undo Pre-Conditions**: Undo is strictly blocked if the match history is completely empty.
-- **Stateless Authentication**: Sessions are mapped to unique GUIDs, separating parallel client browsers cleanly.
+### Prompt 2: Mapping predictable AI Defense & Move Priority States
+*   **Target Context**: Generating a highly defensive, rule-based AI opponent that can reliably analyze the 1D board array and make logical choices.
+*   **Prompt I wrote**:
+    > "I need a deterministic search function in C# for a computer player 'O' playing against player 'X' on a 1D board of 9 cells. I want the AI to run according to these strict priorities:
+    > Priority 1: Check if 'O' can immediately win in 1 move, return that cell index.
+    > Priority 2: Check if 'X' has two in a row and block their winning move.
+    > Priority 3: Grab the center square (index 4) if open.
+    > Priority 4: Select from remaining open corner indices [0, 2, 6, 8].
+    > Priority 5: Fallback to the first available index.
+    > Write the helper method `int FindBestMove(string[] board)` returning the optimal 0-8 position. Keep it lightweight and free of external package dependencies."
+*   **How I refined the result**: The AI generated simple static array checks. I integrated this logic as a core utility inside my `GameService`, ensuring that it triggers automatically as a callback on the server every time a human player registers an action.
 
 ---
 
-## 11. Known Limitations
-
-- **Ephemeral Storage**: In this demonstration suite, states are cached in-memory and are flushed if the server container restarts.
-- **Interleaved Play**: Multiple users logging into the same Session ID can interleave moves if they click simultaneously.
+### Prompt 3: Modeling Multi-Difficulty AI Selector Branches
+*   **Target Context**: Adding Easy/Medium/Hard difficulty options dynamically in the C# server logic.
+*   **Prompt I wrote**:
+    > "I want to add difficulty levels to my computer opponent in C#. Let's use an enum `DifficultyLevel { Easy, Medium, Hard }`. 
+    > - Easy mode: AI chooses any random open index from the board.
+    > - Hard mode: AI uses our existing deterministic 5-step rules priority matrix.
+    > - Medium mode: The AI has a 50% chance of making a random move, and a 50% chance of playing the optimal Hard move.
+    > Write a clean, high-performance method to branch these. Make sure the random number generator is thread-safe and doesn't get reseeded on every call."
+*   **How I refined the result**: I converted the RNG selection to use a static readonly `Random` instance at class level to ensure high entropy, and integrated this directly with the UI request binding payloads. This lets the user toggle between difficulty levels seamlessly during vs-computer play.
 
 ---
 
-## 12. Future Improvements
+## 🎨 Notable Design Decisions
 
-- **Database Store Integration**: Transitioning the volatile state provider to SQLite or SQL Server using an Entity Framework Core migrations package.
-- **Live WebSocket Support**: Wrapping typical HTTP polling in SignalR channels to enable real-time, low-latency multiplayer matches.
-- **Minimax AI Upgrades**: Advancing the deterministic AI into a complete Minimax pruning algorithm to support selectable difficulty levels.
+*   **Command Replay Pattern**: The "Undo" action doesn't try to guess or use inverse math calculations. It clears the board and replays history sequentially up to the targeted index. This guarantees mathematical model correctness.
+*   **Stateless REST API via Session UUID**: Users can open multiple browser windows to play separate matches simultaneously. Every tab is bound to a unique state GUID generated on game initialization so sessions never cross-talk.
+*   **Angular Signals Over Raw State**: By using `signal` and `computed`, the frontend avoids unnecessary heavy re-renders. Component elements only refresh when their specific bound slice of data changes.

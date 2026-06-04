@@ -7,6 +7,8 @@ namespace EnterpriseTicTacToe.API.DTOs
     {
         [Required]
         public GameMode Mode { get; set; } = GameMode.TwoPlayer;
+
+        public DifficultyLevel Difficulty { get; set; } = DifficultyLevel.Hard;
     }
 
     public class MakeMoveRequest
