@@ -1,4 +1,4 @@
-# Enterprise Tic-Tac-Toe Suite 🎮
+ Enterprise Tic-Tac-Toe Suite 
 
 I built this project to demonstrate a clean, modern, full-stack implementation of a Tic-Tac-Toe gaming system. It couples a robust **ASP.NET Core 8 Web API** backend with a reactive **Angular 18** frontend utilizing **Signals**, **RxJS**, and **Tailwind CSS**. 
 
@@ -6,7 +6,7 @@ Rather than relying on basic client-only logic, the entire state engine, concurr
 
 ---
 
-## 🚀 Architectural Blueprint
+ Architectural Blueprint
 
 The application is structured as a clear distributed system:
 *   **The Backend (C# / .NET 8 Web API)**: Formulated as a stateless controller layer communicating with a thread-safe in-memory session manager. It handles game simulation, AI move generation, scoreboard persistence, and history restoration.
@@ -14,7 +14,7 @@ The application is structured as a clear distributed system:
 
 ---
 
-## ✨ Features Implemented
+ Features Implemented
 
 1.  **Multiple AI Difficulty Options**: Restructure vs-Computer mode with three adaptive modes:
     *   **Easy**: Plays unpredictable, randomly selected valid moves.
@@ -31,9 +31,10 @@ The application is structured as a clear distributed system:
 
 ---
 
-## 🛠️ Step-by-Step Local Setup
+ Step-by-Step Local Setup
 
-### Running the Backend REST API
+Running the Backend REST API
+
 Ensure you have the **.NET SDK 8.0** installed on your workstation.
 
 1.  Open your terminal and navigate to the API project directory:
@@ -54,7 +55,8 @@ Ensure you have the **.NET SDK 8.0** installed on your workstation.
 
 ---
 
-### Running the Angular Client App
+Running the Angular Client App
+
 Ensure you have **Node.js (v18+)** and **npm** installed.
 
 1.  Open a separate terminal window and head to the client root directory:
@@ -73,7 +75,7 @@ Ensure you have **Node.js (v18+)** and **npm** installed.
 
 ---
 
-## 🧪 Testing and Verification
+ Testing and Verification
 
 I wrote a suite of automated unit tests to ensure that the core winner checks, invalid moves, and AI strategies are mathematically correct.
 
@@ -95,7 +97,7 @@ The assertions validate:
 
 ---
 
-## 📡 API Endpoint Reference
+ API Endpoint Reference
 
 The backend communicates via lightweight JSON payloads. Below is a summary of the active endpoints:
 
@@ -111,9 +113,9 @@ The backend communicates via lightweight JSON payloads. Below is a summary of th
 
 ---
 
-## 🧠 AI Co-Pilot & Prompt Engineering Strategy
+ AI Co-Pilot & Prompt Engineering Strategy
 
-Rather than letting AI build this system end-to-end, I wanted to act as the head architect. I designed the structure, wrote the API route endpoints, and built the Angular state services, but I treated LLMs (such as Claude 3.5 Sonnet and Gemini) as specialized static math calculators. 
+I designed the structure, wrote the API route endpoints, and built the Angular state services, but I treated LLMs (such as Claude 3.5 Sonnet and Gemini) as specialized static math calculators. 
 
 By writing highly specific, isolated prompts with strict input/output bounds, I had AI generate deterministic logic blocks, which I then integrated and manually refined.
 
@@ -133,7 +135,7 @@ Here is the exact playbook of how I designed my prompts to solve key algorithms:
 
 ---
 
-### Prompt 2: Mapping predictable AI Defense & Move Priority States
+ Prompt 2: Mapping predictable AI Defense & Move Priority States
 *   **Target Context**: Generating a highly defensive, rule-based AI opponent that can reliably analyze the 1D board array and make logical choices.
 *   **Prompt I wrote**:
     > "I need a deterministic search function in C# for a computer player 'O' playing against player 'X' on a 1D board of 9 cells. I want the AI to run according to these strict priorities:
@@ -147,7 +149,7 @@ Here is the exact playbook of how I designed my prompts to solve key algorithms:
 
 ---
 
-### Prompt 3: Modeling Multi-Difficulty AI Selector Branches
+ Prompt 3: Modeling Multi-Difficulty AI Selector Branches
 *   **Target Context**: Adding Easy/Medium/Hard difficulty options dynamically in the C# server logic.
 *   **Prompt I wrote**:
     > "I want to add difficulty levels to my computer opponent in C#. Let's use an enum `DifficultyLevel { Easy, Medium, Hard }`. 
@@ -159,7 +161,7 @@ Here is the exact playbook of how I designed my prompts to solve key algorithms:
 
 ---
 
-## 🎨 Notable Design Decisions
+ Notable Design Decisions
 
 *   **Command Replay Pattern**: The "Undo" action doesn't try to guess or use inverse math calculations. It clears the board and replays history sequentially up to the targeted index. This guarantees mathematical model correctness.
 *   **Stateless REST API via Session UUID**: Users can open multiple browser windows to play separate matches simultaneously. Every tab is bound to a unique state GUID generated on game initialization so sessions never cross-talk.
