@@ -375,10 +375,10 @@ export default function App() {
               <span className={`border text-[9px] px-2 py-0.5 rounded-full font-bold font-mono tracking-wider ${
                 theme === 'light' ? 'bg-red-50 border-red-200 text-red-600' : 'bg-red-950/40 border-red-900/60 text-red-400'
               }`}>
-                PRODUCT TESTING SUITE
+                GAME CENTER
               </span>
             </div>
-            <p className={`text-[11px] ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Professional evaluation workspace for ABB technical selection panel</p>
+            <p className={`text-[11px] ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Play Tic-Tac-Toe against our program AI or local companion in a beautifully crafted interface</p>
           </div>
         </div>
 

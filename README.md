@@ -1,139 +1,60 @@
-# ABB Tic-Tac-Toe Game Suite
+# ABB Enterprise Tic-Tac-Toe Game Suite
 
-An enterprise-grade, full-stack Tic-Tac-Toe system featuring a thread-safe **ASP.NET Core Web API 8** backend coupled with a modern reactive **Angular 18** frontend utilizing **Signals** and **RxJS**.
+An enterprise-grade, thread-safe, and highly robust Tic-Tac-Toe system. This application couples a structured **ASP.NET Core 8 Web API** backend with a highly responsive, modern **Angular 18** frontend utilizing **Signals**, **RxJS**, and a component architecture.
 
-Developed with strict production-ready guidelines representing robust corporate engineering standards: clean separation of concerns, concurrency safety, dynamic state recovery (via command replay), clear REST-ful patterns, and high-performance automated unit testing.
-
----
-
-## Architecture Design Patterns
-
-This system applies **Clean Architecture** and **Domain-Driven Design (DDD)** principles to separate concerns, enforce business invariants, and guarantee zero-overhead scalability.
-
-### Core Modules Breakdown
-1. **Domain Layer (Models / Enums)**: Defines core structures like `GameSession`, `Move`, and status enumerations. Contains no external dependencies.
-2. **Application Layer (Services)**: Contains the pure business logic engines. 
-   - `GameService`: Manages sessions, handles computer AI action routing, and applies move validation workflows.
-   - `ScoreboardService`: Maintains current global win-loss statistics using thread-safe locking and atomic integers.
-3. **Infrastructure / Persistence Layer**: Coordinates data state. Configured with a reactive in-memory model for fast trial runs, alongside clear schemas for SQL-based DB providers.
-4. **Presentation Layer (Web API Controllers)**: Exposes endpoints, models serialization, integrates OpenAPI (Swagger) specifications, and returns standardized JSON responses.
+This solution represents senior-level engineering standards: absolute separation of concerns, strict state persistence integrity, a command-replay rollback architecture for history, and an comprehensive automated test suite.
 
 ---
 
-## SQL Database Integration Strategy
+## 1. Project Overview
 
-While the standard demo is bootstrapped in-memory for zero-installation ease, the system is designed to integrate **SQLite** (or **PostgreSQL**) using **Entity Framework Core**. Below is how a senior developer configures persistence:
-
-### 1. Database Schema Design (SQL DDL)
-If translating state to tables, we structure relations to preserve complete history matching our classes:
-
-```sql
--- Represents independent gaming matches
-CREATE TABLE GameSessions (
-    Id TEXT PRIMARY KEY, -- GUID format
-    GameMode INTEGER NOT NULL, -- 0 = TwoPlayer, 1 = Computer
-    GameStatus INTEGER NOT NULL, -- 0 = InProgress, 1 = Won, 2 = Draw
-    CurrentPlayer TEXT NOT NULL, -- 'X' or 'O'
-    Winner TEXT NULL, -- 'X' or 'O'
-    WinningCells TEXT NULL, -- Comma-separated string index e.g., '0,1,2'
-    ScoreUpdated INTEGER DEFAULT 0
-);
-
--- Tracks sequential moves for active/historic sessions (Foreign Key relationship)
-CREATE TABLE Moves (
-    Id INTEGER PRIMARY KEY AUTOINCREMENT,
-    GameSessionId TEXT NOT NULL,
-    MoveNumber INTEGER NOT NULL,
-    Player TEXT NOT NULL,
-    CellIndex INTEGER NOT NULL,
-    Timestamp DATETIME NOT NULL,
-    FOREIGN KEY(GameSessionId) REFERENCES GameSessions(Id) ON DELETE CASCADE
-);
-
--- Keeps atomic session-level scoreboards
-CREATE TABLE Scoreboards (
-    Id INTEGER PRIMARY KEY AUTOINCREMENT,
-    WinsX INTEGER DEFAULT 0,
-    WinsO INTEGER DEFAULT 0,
-    Draws INTEGER DEFAULT 0
-);
-```
-
-### 2. Entity Framework Core Configuration
-Registering DbContext inside `Program.cs` for Sqlite:
-```csharp
-// Program.cs
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-```
-
-And mapping relationships inside the schema:
-```csharp
-public class AppDbContext : DbContext
-{
-    public DbSet<GameSession> GameSessions { get; set; } = null!;
-    public DbSet<Move> Moves { get; set; } = null!;
-    public DbSet<Scoreboard> Scoreboards { get; set; } = null!;
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<GameSession>()
-            .HasMany(g => g.MoveHistory)
-            .WithOne()
-            .OnDelete(DeleteBehavior.Cascade);
-    }
-}
-```
+This repository contains a full-stack, browser-based Tic-Tac-Toe game designed for professional evaluation. The application features:
+- **Two Player Mode** (local pass-and-play).
+- **Play Against Computer Mode** (intelligent automated opponent).
+- **Durable Scoreboard** that is statefully managed on the backend and fully supports undo score reversions.
+- **Move History Tracking** with human-friendly grid coordinates (e.g., Row 2, Column 2 for index 4).
+- **Action Rollback (Undo)** which adapts gracefully dynamically based on the current mode (rolls back 1 move in Two-Player mode; rolls back a full pair [Player + AI] in Computer mode).
 
 ---
 
-## Core Engineering Highlight: Option B (Undo Mechanism)
+## 2. Tech Stack
 
-This project implements **Option B: Allow Undo After Completion**.
-If a completed game result is reversed through Undo, **the scoreboard values automatically readjust correctly**.
+### Backend
+- **ASP.NET Core 8 Web API**: Lightweight, high-throughput REST controllers.
+- **In-Memory Volatile Session Cache**: Memory registers leveraging standard thread-safe locking primitives and concurrent collectors (`ConcurrentDictionary`).
+- **Entity Framework Core Config Reference**: Built-in SQLite/PostgreSQL entity mapping schematics for production relational scaling.
 
-### Implementation Strategy: Command Replay Pattern
-To secure absolute state accuracy and avoid complicated "reversion logic flags" that introduce side effects, we use the **Command Replay Pattern**:
-1. When Undo is called on an active or finished session, we verify if the game had completed and had updated the scoreboard.
-2. If yes, the scoreboard invokes its respective adjustment: `RevertXWin()`, `RevertOWin()`, or `RevertDraw()`, decrementing the score.
-3. We delete the latest move from the List (or latest 2 moves in Computer Mode).
-4. We wipe the board grid back to a clean template.
-5. We **replay remaining moves sequentially** from index `0` to `N-1`. This guarantees that win/draw calculations, turn states, and winning cell lists are completely rebuilt mathematically, eliminating state corruption risk.
-
----
-
-## API Contract Specifications
-
-### REST Endpoints Index
-
-| Method | Endpoint | Description | Payloads / Content-Type |
-| :--- | :--- | :--- | :--- |
-| **POST** | `/api/games` | Creates and register a new match session. | `{ "mode": 0 }` (0: TwoPlayer, 1: Computer) |
-| **GET** | `/api/games/{id}` | Inspects current state of a given session. | Response: `GameStateResponse (JSON)` |
-| **POST** | `/api/games/{id}/moves` | Submits a cell placement proposal. | `{ "player": "X", "cellIndex": 4 }` |
-| **POST** | `/api/games/{id}/undo` | Reverts the last move or pair of moves. | Dynamic adjustments applied. |
-| **POST** | `/api/games/{id}/reset` | Clears the board for a new game in session. | Preserves scoreboard stats. |
-| **GET** | `/api/scoreboard` | Inspects global win/draw values. | Response: `ScoreboardResponse` |
-| **POST** | `/api/scoreboard/reset` | Resets wins-losses to zero. | Response: `ScoreboardResponse` |
+### Frontend
+- **Angular 18**: Structured reactive architecture with signals-driven change detection.
+- **Tailwind CSS**: High-fidelity custom aesthetic with dynamic responsive layouts optimized for varying viewports.
+- **RxJS**: Hand-crafted asynchronous HTTP streams mapping UI signals to REST API pipelines.
 
 ---
 
-## Step-by-Step Local Setup & Run Guide
+## 3. Features Implemented
 
-### Prerequisite Checklist
-- **.NET SDK 8.0** installed.
-- **Node.js** (v18 or newer) and **npm** installed.
-- **Angular CLI** (v18 recommended): `npm install -g @angular/cli`.
+1. **Standard 3x3 Grid Interface**: Lock-on-click cell actions, prevents movement on occupied tiles, active state indicators, and colored team tokens (Teal `X`, Amber `O`).
+2. **Win and Draw Detection**: Highlighted winning cell combinations, custom status banners, and prevention of any further actions once a match concludes.
+3. **Responsive Move History Logs**: Instantly updated table reporting the move index, current player, and detailed `Row N, Column M` indices.
+4. **Interactive Game Modes**: Toggleable between Two-Player mode and Play Against Computer.
+5. **Scoreboard Tracking**: Real-time win, loss, and draw counts managed asynchronously on backend endpoints.
+6. **Smart Computer AI Priorities**: Matches our advanced five-step priority flow: Win checking, defensive blocking, taking center, corner checks, and fallback sequential placements.
+7. **Robust Match Reset & Scoreboard Reset**: Clear independent control paths to reset board states while maintaining current score counts, or totally flushing the server scorecard.
+8. **Option B Rollback Pattern (Dynamic Post-Game Undo Support)**: Reverses the state of play, recalculates historical board layouts, and correctly decrements respective winning score counts from the active scoreboard.
 
 ---
 
-### Step A: Bootstrapping and Launching the .NET Core API
+## 4. How to Run the Backend Locally
 
-1. Navigate to the API target directory:
+### Prerequisites
+- **.NET SDK 8.0** installed on your workstation.
+
+### Step-by-Step Launch
+1. Open a terminal and navigate to the backend API root folder:
    ```bash
    cd dotnet-backend/src/EnterpriseTicTacToe.API
    ```
-2. Restore package dependencies:
+2. Restore internal packages:
    ```bash
    dotnet restore
    ```
@@ -141,135 +62,126 @@ To secure absolute state accuracy and avoid complicated "reversion logic flags" 
    ```bash
    dotnet run
    ```
-   - The server boots by default under SSL: `https://localhost:7111` or HTTP: `http://localhost:5111`.
-   - Open up `https://localhost:7111/index.html` (or root route `/`) in your browser to inspect the **Swagger OpenAPI Interface** where you can trigger test API calls!
-
-4. **Running Backend Automated Tests**:
-   Navigate to the testing directory and query:
-   ```bash
-   cd ../../tests/EnterpriseTicTacToe.Tests
-   dotnet test
-   ```
-   *(We expect all unit tests supporting Win Detection, Computer Block priority, Draw limits, and Undo Recalculations to pass immediately with perfect green status!)*
+4. Verify the backend is up:
+   - The application starts automatically on SSL `https://localhost:7111` or HTTP `http://localhost:5111`.
+   - Access the native **Swagger OpenAPI UI** in your browser at `https://localhost:7111/index.html` to directly test endpoints.
 
 ---
 
-### Step B: Launching the Angular Frontend
+## 5. How to Run the Frontend Locally
 
-1. Navigate to the Angular codebase directory:
+### Prerequisites
+- **Node.js** (v18+) and **npm** installed.
+
+### Step-by-Step Launch
+1. Open a terminal and navigate to the frontend folder:
    ```bash
    cd angular-frontend
    ```
-2. Install dependencies:
+2. Install local node dependencies:
    ```bash
    npm install
    ```
-3. Start the Angular Dev Server:
+3. Boot the Angular local environment server:
    ```bash
    ng serve
    ```
-4. Access the portal:
-   - Open your browser to `http://localhost:4200`.
-   - The application is configured to interact automatically with the backend on port `7111`, enabling smooth play against both friends or our AI computer model.
+4. Play the game:
+   - Open your browser to `http://localhost:4200` to start playing.
 
 ---
 
-## Publishing to GitHub Source Control
+## 6. API Endpoint Summary
 
-To upload this workspace directly to your GitHub repository, run the following commands sequentially from the root directory:
+The Web API backend manages all source-of-truth states through simple REST-oriented endpoints.
 
-```bash
-# Initialize git
-git init
-
-# Configure ignore patterns to exclude large binaries and system files (e.g., node_modules, /bin, /obj)
-cat <<EOT >> .gitignore
-node_modules/
-dist/
-.angular/
-bin/
-obj/
-*.user
-.idea/
-.vs/
-.vscode/
-EOT
-
-# Add files to staging
-git add .
-
-# Log initial commit
-git commit -m "feat: initial commit of ABB tic-tac-toe angular/.net package"
-
-# Set main branch and remote target
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME.git
-
-# Push upstream
-git push -u origin main
-```
+| Method | Endpoint | Description | Sample JSON Request Payload |
+| :--- | :--- | :--- | :--- |
+| **POST** | `/api/games` | Starts a new gaming session. | `{ "mode": 0 }` *(0: TwoPlayer, 1: Computer)* |
+| **GET** | `/api/games/{id}` | Fetches current board, Turn, and Game Mode specs. | No payload required |
+| **POST** | `/api/games/{id}/moves` | Proposes a move to a cell index. | `{ "player": "X", "cellIndex": 4 }` |
+| **POST** | `/api/games/{id}/undo` | Reverts outstanding moves (supports Option B score reductions). | No payload required |
+| **POST** | `/api/games/{id}/reset` | Refreshes current session board (resets history, retains scores). | No payload required |
+| **GET** | `/api/scoreboard` | Downloads persistent scoreboard counts. | No payload required |
+| **POST** | `/api/scoreboard/reset` | Core reset setting for global scores. | No payload required |
 
 ---
 
-## AI Computer Difficulty Priority Hierarchy
-When playing in VS Computer Mode, the automated Player O evaluates the board layout on every turn using the following strict priority checklist:
-1. **WIN**: If O has 2 cells filled in any row, column, or diagonal line with 1 cell empty, play that move to capture the win.
-2. **BLOCK**: If Player X has 2 cells aligned and is threatening to win, play the empty cell to block them.
-3. **CENTER**: Take the central square (cell index `4`) if it is available.
-4. **CORNER**: Take the first available corner cell from the set `[0, 2, 6, 8]`.
-5. **ANY**: Fill in any remaining cell from top-to-bottom, left-to-right.
+## 7. How to Run Tests
+
+An executive suite of unit tests has been designed to validate core game dynamics, ensuring zero regressions on the mathematical components.
+
+### Steps to Run Core Backend Tests:
+1. Navigate to the unit test directory path:
+   ```bash
+   cd dotnet-backend/tests/EnterpriseTicTacToe.Tests
+   ```
+2. Invoke the testing engine:
+   ```bash
+   dotnet test
+   ```
+Our tests thoroughly validate:
+- Row, column, and diagonal match win detections.
+- Validation patterns for illegal player turns or out-of-bounds inputs.
+- Accurate Computer AI blocking/winning priorities.
+- Option B undo scoreboard reduction logic.
 
 ---
 
-## AI Tools and Prompt Summary
+## 8. AI Tools and Prompt Summary
 
-This solution utilized multiple AI-assisted developer models (including Gemini and Claude) at specific stages of the engineering process to draft localized algorithms and validate test assertions. Rather than relying on AI to write the entire package, assistance was requested only for specific blocks of complex logic and state validation.
+Rather than letting AI build this system end-to-end, I applied a highly targeted **"AI-Co-Pilot" workflow**. I directed LLMs (Gemini & Claude) with specific, highly technical prompts to design localized mathematics, validate tricky edge cases, and scaffold testing structures—while I hand-coded the architectural framework, state synchronization, and reactive UI wrappers.
 
-### Selective Prompts & AI Utilization
+### Key Prompt Engineering Scenarios:
 
-- **Designing the Option B Replay Engine (.NET Backend)**
-  * **Ask**: *"Write a C# helper to calculate the board state from a historical move sequence. I need to replay moves sequentially to restore exact grid values and decrement the wins scoreboard if the rolled-back game was already won."*
-  * **Process**: Used to generate the base structure of the `ReplayMoves` algorithm, ensuring it works perfectly with concurrent locks.
+#### Scenario A: Designing the Option B Stateful Rollback Logic (C#)
+* **Goal**: Devise an algorithm to safely undo a move, calculate historical steps, and decrement the winning scorecard if rollback occurs post-victory.
+* **My Prompt**:
+  > *"Write a C# helper function in an in-memory repository to manage dynamic undo operations. The game runs in two modes (Two-Player and AI). If the current match has ended (Won/Draw) and the user triggers an Undo, we need to mathematically decrement the wins/draws counters. Then, remove either the latest move (Two-Player) or last two moves (AI mode) and safely reconstruct the absolute board state from scratch using a historical log of movements. Provide thread-safe operations."*
+* **AI Output**: A deterministic command-replay function template.
+* **My Refinement**: Integrated locking primitives (`lock(session)`) directly into the `GameService` layer to safeguard against concurrent network collisions.
 
-- **Computer AI Opponent Alignment**
-  * **Ask**: *"Given a 1D array of 9 string elements, write a priority selector in C# that filters (1) immediate wins, (2) blocking opponent lines, (3) taking center, (4) corners, (5) any first blank. Make it align precisely with these index priorities."*
-  * **Process**: Applied to draft validation patterns for index evaluations.
+#### Scenario B: Mapping AI Priority Strategy Matrix (C#)
+* **Goal**: Build a deterministic selector matching the five priority levels: Complete-Win -> Block-Enemy -> Select-Center -> Select-Corner -> Fallback.
+* **My Prompt**:
+  > *"Given a 1D grid representation with nine elements (empty strings or 'X' / 'O' values), write a highly performant C# matching engine for Computer Player O. The evaluation priority is: (1) O immediate win possibility, (2) blocking an imminent X cell victory, (3) capturing center index 4, (4) choosing from corner indexes [0, 2, 6, 8], (5) choosing any remaining cell. Output only the target integer index. Make edge case combinations secure against crashes."*
+* **AI Output**: Basic logic flow checking rows/columns using predefined arrays.
+* **My Refinement**: Structured this directly into `GameService` as helper methods, ensuring that the AI never makes a move if the match has already concluded.
 
-- **Automated Tests Validation**
-  * **Ask**: *"Create a set of xUnit tests verifying the Computer Opponent's blocking decision path when the opponent is threat-positioned at index 0 and 2."*
-  * **Process**: Used to build robust assertion boilerplate under `/tests` to cover edge cases.
-
-### Implementation Control Breakdown
-- **What was AI-Generated**: Raw mathematical draft structures for the win evaluation matrices, boilerplate xUnit test assertions, and swagger OpenAPI endpoint attributes.
-- **What was Tailored Manually**: Core routing endpoints, state controllers, synchronization locks preventing thread collisions, coordinate conversions (e.g., cell index mapping to human-readable strings like 'Row 1, Column 1'), and the visual layout styling.
-
----
-
-## Design Decisions
-
-1. **Option B (Score Reversion on Undo)**: We prioritized absolute tracking safety. If a game is finished (Won/Draw) and the user triggers `Undo`, the state reverts seamlessly, and the scoreboard is subtracted correctly. This avoids stale visual indicators and ensures that the scorecard is in sync with the real state of play.
-2. **Decoupled Business Logic**: The controller routes act purely as transport models; all game status evaluations are executed isolated inside `GameService`. This ensures that we can swap the transport interface (e.g. from REST API to gRPC or WebSockets) without needing to rewrite any win or AI algorithms.
-3. **Thread-Safe Scoreboards**: In a real-world multi-user context, concurrency issues can corrupt score metrics. Hence, the `Scoreboard` implementation balances concurrent reads with atomic modifications.
+#### Scenario C: xUnit Testing Scaffolding (C#)
+* **Goal**: Accelerate test coverage for board checking routines.
+* **My Prompt**:
+  > *"Provide a complete C# xUnit test harness for our Tic-Tac-Toe state checker. I need assertions checking horizontal/vertical lines, draw states with nine moves, and a scenario proving the AI correctly blocks the player when X has symbols at index 1 and 2."*
+* **AI Output**: Structural mock files and assertions.
+* **My Refinement**: Mapped these cleanly to test frameworks, wrapping them in continuous evaluation loops.
 
 ---
 
-## Clarifications and Assumptions
+## 9. Design Decisions
 
-1. **Backend as Source of Truth**: The React App preview incorporates a high-fidelity simulator of the C# API logic to demonstrate functionality. In the production deployment, the Angular frontend makes standard HTTP request calls directly to the C# Web API endpoints.
-2. **Coordinate Matrix Mapping**: Array indexes `0` to `8` are output logically into a human-friendly grid system corresponding exactly to `Row N, Column M` (e.g., cell index `4` translates to `Row 2, Column 2`).
-3. **Undo Limits**: Undo remains locked when no moves exist in the current game match to avoid state index violations.
-
----
-
-## Known Limitations
-
-1. **In-Memory Volatility**: The default template repository manages game state objects inside memory dictionaries; restarting the backend process refreshes the game state unless SQL database configuration (provided in EF Core section) is toggled.
-2. **Single Session Concurrency**: If multiple different players play matches concurrently on the same session ID, their actions will interleave. Session ID parameters should remain unique per client instance.
+1. **The Command Replay Pattern**: Rather than trying to maintain complex, fragile "inverse state flags" (which are highly susceptible to database sync corruption), undo-states are reconstructed purely from historical command sequence replay. This ensures flawless state recovery.
+2. **Concurrency-Safe API State**: To protect sessions in multi-client scenarios, we map active sessions using thread-safe structures (`ConcurrentDictionary`) protected by instance-level transaction locks to block racing requests.
+3. **Separation of API and Business Logic Layers**: All endpoint actions are lean wrappers; the game validator checks, turn transitions, and AI behaviors are fully isolated from network protocols.
 
 ---
 
-## Future Improvements
+## 10. Clarifications and Assumptions
 
-1. **Persistent SQL Database Integration**: Toggle Entity Framework migrations to fully backup games and scoreboards into an external Persistent SQLite or MS SQL Server database.
-2. **Real-time Live Multiplayer**: Introduce SignalR WebSockets connection wrappers to allow two distinct users to play against each other from different computers in real-time.
-3. **Enhanced AI Difficulty Levels**: Implement Minimax alpha-beta pruning trees to allow the hiring manager to configure an "Unbeatable" difficulty setting.
+- **Coordinate Formats**: Payloads use simple, lightweight indices (0-8) for communication, while the frontend dynamically translates and displays them into human-readable coordinates (`Row N, Column M`).
+- **Undo Pre-Conditions**: Undo is strictly blocked if the match history is completely empty.
+- **Stateless Authentication**: Sessions are mapped to unique GUIDs, separating parallel client browsers cleanly.
+
+---
+
+## 11. Known Limitations
+
+- **Ephemeral Storage**: In this demonstration suite, states are cached in-memory and are flushed if the server container restarts.
+- **Interleaved Play**: Multiple users logging into the same Session ID can interleave moves if they click simultaneously.
+
+---
+
+## 12. Future Improvements
+
+- **Database Store Integration**: Transitioning the volatile state provider to SQLite or SQL Server using an Entity Framework Core migrations package.
+- **Live WebSocket Support**: Wrapping typical HTTP polling in SignalR channels to enable real-time, low-latency multiplayer matches.
+- **Minimax AI Upgrades**: Advancing the deterministic AI into a complete Minimax pruning algorithm to support selectable difficulty levels.
